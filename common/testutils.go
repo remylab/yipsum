@@ -7,7 +7,7 @@ import (
 
 func createDb(targetDb string) {
 	    // cat conf/evol/createdb.sql | sqlite3 work/yipsum.db
- 	c1 := exec.Command("cat", os.Getenv("yip_root")+"/conf/evol/fulldb.sql")
+ 	c1 := exec.Command("cat", GetRootPath()+"/conf/evol/fulldb.sql")
     c2 := exec.Command("sqlite3", targetDb)
     c2.Stdin, _ = c1.StdoutPipe()
     c2.Stdout = os.Stdout
