@@ -1,0 +1,7 @@
+
+## Import sql file to db
+cat conf/evol/createdb.sql | sqlite3 work/yipsum.db
+
+## Describe schema or table
+sqlite> .schema 
+sqlite> .schema tablename

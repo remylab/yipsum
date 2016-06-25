@@ -7,26 +7,31 @@ import (
     "text/template"
     "github.com/labstack/echo"
     "github.com/remylab/yipsum/db"
+    "github.com/remylab/yipsum/common"
 )
 
 
-type Handler struct {
-    Dbm db.DbManager
-}
+type (
+    Handler struct {
+        Dbm db.DbManager
+    }
 
-// Enable templating
-type Template struct {
-    templates *template.Template
-}
+    Template struct {
+        templates *template.Template
+    }
+)
+var (
+    h *Handler
+)
 
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
     return t.templates.ExecuteTemplate(w, name, data)
 }
 
 
-func GetTemplate(s string) *Template {
+func GetTemplate() *Template {
     return  &Template{
-        templates: template.Must( template.ParseGlob(s + "/public/views/*.html") ),
+        templates: template.Must( template.ParseGlob(common.GetRootPath() + "/public/views/*.html") ),
     }
 }
 
@@ -46,7 +51,7 @@ func ErrorHandler(err error, c echo.Context) {
 
         code = he.Code
         msg = he.Message
-        fmt.Printf("err msg :%v",msg)
+        fmt.Printf("err msg :%v\n",msg)
         switch code {
         case http.StatusNotFound:
             c.Render(code, "404","")

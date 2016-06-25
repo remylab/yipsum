@@ -11,9 +11,8 @@ import (
 
     "github.com/remylab/yipsum/handlers"
     "github.com/remylab/yipsum/db"
+    "github.com/remylab/yipsum/common"
 )
-
-var rootPath = "."
 
 func checkErr(err error) {
     if err != nil {
@@ -29,11 +28,11 @@ func main() {
     e.Static("/static", "public/assets")
     e.Pre(middleware.RemoveTrailingSlash())
     // templates
-    e.SetRenderer(handlers.GetTemplate(rootPath))
+    e.SetRenderer(handlers.GetTemplate())
     // custom error handling
     e.SetHTTPErrorHandler(handlers.ErrorHandler)
 
-    dbm, dbmErr  := db.NewSqliteManager("./yipsum.db")
+    dbm, dbmErr  := db.NewSqliteManager(common.GetRootPath()+"/yipsum.db")
     h := &handlers.Handler{dbm}
 
     // middleware : check critical parts 
@@ -49,6 +48,8 @@ func main() {
 
     // Routes
     e.GET("/", h.Index)
+    e.GET("/api/checkname", h.CheckName)
+    e.GET("/api/checkname/:uri", h.CheckName)
 
 
     /*// (LINUX ONLY) don't drop connections with stop restart

@@ -24,12 +24,25 @@ func NewSqliteManager(dbPath string) (*SqliteManager, error) {
 	return &SqliteManager{db}, nil
 }
 
-
 func (m *SqliteManager) Close() error {
 	return m.db.Close()
 }
 
+func (m *SqliteManager) CheckUri(s string) (bool,error) {
 
+	stmt, err := m.db.Prepare("select count(1) count from ipsums where uri = ?")
+	if err != nil {return false, err}
+	defer stmt.Close()
+
+    var count int
+	err = stmt.QueryRow(s).Scan(&count)
+	if err != nil { return false, err }
+
+	//fmt.Printf("counter from db :%v",counter)
+	return (count==0), nil
+}
+
+/*
 func (m *SqliteManager) CreateDB() error {
 
     ddl := `
@@ -45,7 +58,6 @@ func (m *SqliteManager) CreateDB() error {
     return err
 }
 
-/*
 var count = -1
 
 func (m *SqliteManager) getCount() (int,error) {

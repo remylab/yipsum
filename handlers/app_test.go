@@ -12,27 +12,29 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var (
-	rootPath = ".." 
-	h = &Handler{}
-)
 
-func resetContext(e *echo.Echo, rec **httptest.ResponseRecorder, c *echo.Context)  {
+
+func resetContext(e *echo.Echo, req *http.Request, rec **httptest.ResponseRecorder, c *echo.Context)  {
 
 	*rec = httptest.NewRecorder()
-	*c = e.NewContext(standard.NewRequest(new(http.Request), e.Logger()), standard.NewResponse(*rec, e.Logger()))
+	*c = e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(*rec, e.Logger()))
+}
+
+func setup(req *http.Request) (*echo.Echo, *httptest.ResponseRecorder,echo.Context) {
+
+	e := echo.New()
+    e.Pre(middleware.RemoveTrailingSlash())
+	e.SetRenderer(GetTemplate())
+	var rec *httptest.ResponseRecorder; var c echo.Context
+	resetContext(e,req,&rec,&c)
+	return e,rec, c
 }
 
 func TestIndex(t *testing.T) {
 
-	// Setup
-	e := echo.New()
-    e.Pre(middleware.RemoveTrailingSlash())
-	e.SetRenderer(GetTemplate(rootPath))
-
+	h = &Handler{nil}
 	req := new(http.Request)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
+	_, rec, c := setup(req)
 
 	c.SetPath("/")
 	if assert.NoError(t, h.Index(c)) {
