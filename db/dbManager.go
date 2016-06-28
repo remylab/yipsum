@@ -4,6 +4,6 @@ import (
 )
 
 type DbManager interface {
-	Close() error
-	CheckUri(s string) (bool,error)
+    Close() error
+    CheckUri(s string) (bool,error)
 }

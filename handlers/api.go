@@ -11,14 +11,14 @@ import (
 )
 
 type (
-	check struct {
-		Ok bool `json:"ok"`
-	}
+    check struct {
+        Ok bool `json:"ok"`
+    }
 )
 
 // URI = "/api/checkname"
 func (h *Handler)CheckName(c echo.Context) error {
 
-	ok, _ := h.Dbm.CheckUri( c.Param("uri") )
+    ok, _ := h.Dbm.CheckUri( c.Param("uri") )
     return c.JSON(http.StatusOK, check{ok} )
 }
