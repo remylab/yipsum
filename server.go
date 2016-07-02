@@ -28,7 +28,7 @@ func main() {
     e.Static("/static", "public/assets")
     e.Pre(middleware.RemoveTrailingSlash())
     // templates
-    e.SetRenderer(handlers.GetTemplate())
+    e.SetRenderer(common.GetTemplate())
     // custom error handling
     e.SetHTTPErrorHandler(handlers.ErrorHandler)
 
@@ -51,9 +51,11 @@ func main() {
     e.GET("/api/checkname", h.CheckName)
     e.GET("/api/checkname/:uri", h.CheckName)
 
+    e.GET("/api/createipsum", h.CreateIpsum)
+
 
     /*// (LINUX ONLY) don't drop connections with stop restart
-    std := standard.New(":1323")
+    std := standard.New(":1424")
     std.SetHandler(e)
     gracehttp.Serve(std.Server) */
     e.Run(standard.New(":1424"))

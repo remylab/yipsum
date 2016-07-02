@@ -1,15 +1,28 @@
-package common
+package test
 
 import (
     "os"
     "os/exec"
+
+    "github.com/labstack/echo"
+    "github.com/labstack/echo/middleware"
+
+    "github.com/remylab/yipsum/common"
 )
+
+func GetEcho() *echo.Echo {
+
+    e := echo.New()
+    e.Pre(middleware.RemoveTrailingSlash())
+    e.SetRenderer(common.GetTemplate())
+    return e
+}
 
 func ImportData(targetDb string, script string) error {
 
     var err error
     // cat conf/evol/createdb.sql | sqlite3 work/yipsum.db
-    c1 := exec.Command("cat", GetRootPath()+script)
+    c1 := exec.Command("cat", common.GetRootPath()+script)
     c2 := exec.Command("sqlite3", targetDb)
     c2.Stdin, err = c1.StdoutPipe()
     if (err != nil) { return err}

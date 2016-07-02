@@ -6,7 +6,7 @@ import (
     "testing"
 
     "github.com/stretchr/testify/assert"
-    com "github.com/remylab/yipsum/common"
+    "github.com/remylab/yipsum/test"
 )
 
 
@@ -19,6 +19,6 @@ func TestFulldb(t *testing.T) {
         if err!=nil { fmt.Printf("Cannot remove test db :%v\n",err) }
     }()
 
-    assert.NoError(t, com.ImportData("./TestFulldb.db","/conf/evol/fulldb.sql"))
+    assert.NoError(t, test.ImportData("./TestFulldb.db","/conf/evol/fulldb.sql"))
 
 }

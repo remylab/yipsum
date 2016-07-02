@@ -1,14 +1,36 @@
 package common
 
 import (
+    "io"
     "os"
     "time"
     "math/rand"
+    "text/template"
+
+    "github.com/labstack/echo"
+)
+
+
+type (
+    Template struct {
+        templates *template.Template
+    }
 )
 
 func GetRootPath() string {
     return os.Getenv("yip_root")
 }
+
+func GetTemplate() *Template {
+    return  &Template{
+        templates: template.Must( template.ParseGlob(GetRootPath() + "/public/views/*.html") ),
+    }
+}
+
+func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+    return t.templates.ExecuteTemplate(w, name, data)
+}
+
 
 func RandomString(strlen int) string {
     rand.Seed(time.Now().UTC().UnixNano())
