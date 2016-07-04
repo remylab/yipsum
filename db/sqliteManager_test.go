@@ -9,6 +9,16 @@ import (
     "github.com/remylab/yipsum/test"
 )
 
+func TestGetIpsum(t *testing.T) {
+
+    dbm, _ := NewSqliteManager("./TestGetIpsum.db")
+    defer AfterDbTest(dbm,"./TestGetIpsum.db")()
+
+    test.LoadTestData("./TestGetIpsum.db","./sqliteManager_test.TestGetIpsum.sql")
+
+    _, err := dbm.GetIpsum("good-uri")
+    assert.Nil(t,err)
+}
 
 func TestCheckUri(t *testing.T) {
 
@@ -24,7 +34,6 @@ func TestCheckUri(t *testing.T) {
     res, err = dbm.CheckUri("some-taken-uri")
     assert.Nil(t,err)
     assert.Equal(t, res,false,"\"some-taken-uri\" should be in the DB")
-
 }
 
 
@@ -38,11 +47,10 @@ func TestCreateIpsum(t *testing.T) {
     res, err := dbm.CreateIpsum("les bronzes", "quote du film les bronzes", "les-bronzes", "admin@email.com")
     assert.Nil(t,err)
     assert.Equal(t, res.Ok,true,"insert in empty DB should work")
-    assert.Equal(t, len(res.Msg),5,"adminKey length should be 5")
+    assert.Equal(t, len(res.Msg),7,"adminKey length should be 7")
 
     res, err = dbm.CreateIpsum("les bronzes", "quote du film les bronzes", "les-bronzes", "admin@email.com")
     assert.NotNil(t,err)
     assert.Equal(t, res.Ok,false,"insert of doublon uri should fail")
     assert.Equal(t, res.Msg, "taken", "should get back \"taken\" Msg")
-
 }

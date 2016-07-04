@@ -1,8 +1,7 @@
 package handlers
 
 import (
-    "fmt"
-    "os"
+    //"fmt"
     "encoding/json"
     "net/http"
     "net/http/httptest"
@@ -21,11 +20,7 @@ import (
 func TestCreateIpsum(t *testing.T) {
 
     dbm, _ := db.NewSqliteManager("./TestCreateIpsum.db")
-    defer func() {
-        dbm.Close()
-        err := os.Remove("./TestCreateIpsum.db")
-        if err!=nil { fmt.Printf("Cannot remove test db :%v\n",err) }
-    }()
+    defer db.AfterDbTest(dbm,"./TestCreateIpsum.db")()
 
     test.LoadTestData("./TestCreateIpsum.db","")
 
@@ -53,25 +48,46 @@ func TestCreateIpsum(t *testing.T) {
     req, _ = http.NewRequest("GET", "/api/createipsum?"+q.Encode(), nil)
     rec = httptest.NewRecorder()
     c = e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
-
-    if assert.NoError(t, h.CreateIpsum(c)) {
-        
+    
+    if assert.NoError(t, h.CreateIpsum(c)) {    
         assert.Equal(t, http.StatusOK, rec.Code)
         res := &check{true,"",nil}
         s, _ := json.Marshal(res)
-        assert.Equal(t,string(s),rec.Body.String())
+        assert.Equal(t,string(s),rec.Body.String(),"CreateIpsum with not null name,uri and email should be successful")
+    }    
+
+
+    req, _ = http.NewRequest("GET", "/api/createipsum?"+q.Encode(), nil)
+    rec = httptest.NewRecorder()
+    c = e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
+
+    if assert.NoError(t, h.CreateIpsum(c)) {    
+        assert.Equal(t, http.StatusOK, rec.Code)
+        res := &check{false,"taken",nil}
+        s, _ := json.Marshal(res)
+        assert.Equal(t,string(s),rec.Body.String(),"CreateIpsum with doublon uri should fail")
     }
+
+
+    q.Set("uri", "jon-snow2")
+    req, _ = http.NewRequest("GET", "/api/createipsum?"+q.Encode(), nil)
+    rec = httptest.NewRecorder()
+    c = e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
+
+    if assert.NoError(t, h.CreateIpsum(c)) {    
+        assert.Equal(t, http.StatusOK, rec.Code)
+        res := &check{true,"",nil}
+        s, _ := json.Marshal(res)
+        assert.Equal(t,string(s),rec.Body.String(),"CreateIpsum bis should be successful")
+    }    
+
 
 }
 
 func TestCheckName(t *testing.T) {
 
     dbm, _ := db.NewSqliteManager("./TestCheckName.db")
-    defer func() {
-        dbm.Close()
-        err := os.Remove("./TestCheckName.db")
-        if err!=nil { fmt.Printf("Cannot remove test db :%v\n",err) }
-    }()
+    defer db.AfterDbTest(dbm,"./TestCheckName.db")()
 
     test.LoadTestData("./TestCheckName.db","./api_test.TestCheckName.sql")
 
@@ -99,7 +115,6 @@ func TestCheckName(t *testing.T) {
     c.SetParamValues("some-taken-uri")
     if assert.NoError(t, h.CheckName(c)) {
         assert.Equal(t, http.StatusOK, rec.Code)
-
         res := &check{false,"",nil}
         s, _ := json.Marshal(res)
         assert.Equal(t,string(s),rec.Body.String())

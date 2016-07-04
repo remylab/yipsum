@@ -34,7 +34,7 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 
 func RandomString(strlen int) string {
     rand.Seed(time.Now().UTC().UnixNano())
-    const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRST"
     result := make([]byte, strlen)
     for i := 0; i < strlen; i++ {
         result[i] = chars[rand.Intn(len(chars))]

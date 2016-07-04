@@ -23,18 +23,6 @@ func (h *Handler)CheckName(c echo.Context) error {
     return c.JSON(http.StatusOK, check{ok,"",nil} )
 }
 
-// URI = "/api/createipsum"
-/*
-    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    uri TEXT NOT NULL,
-    desc TEXT,
-    adminKey TEXT NOT NULL,
-    newAdminKey,
-    adminEmail TEXT NOT NULL,
-    newAdminEmail,
-    created INTEGER
-*/
 func (h *Handler)CreateIpsum(c echo.Context) error {
 
     res := check{true,"",nil}
@@ -42,7 +30,7 @@ func (h *Handler)CreateIpsum(c echo.Context) error {
     name := c.FormValue("name")
     uri  := c.FormValue("uri")
     email := c.FormValue("email")
-    //desc := c.FormValue("desc")
+    desc := c.FormValue("desc")
 
     var err []string
 
@@ -61,6 +49,18 @@ func (h *Handler)CreateIpsum(c echo.Context) error {
         res.Msg = "missing_params"
     }
     res.Values = err
+
+    if ( res.Ok ) {
+        createRes, createErr := h.Dbm.CreateIpsum(name, desc, uri, email)
+        if ( !createRes.Ok || createErr != nil ) {
+            res.Ok = false
+            if (createRes.Msg == "taken") {
+                res.Msg = "taken"
+            } else {
+                res.Msg = "internal_error"
+            }
+        }
+    }
 
 
     return c.JSON(http.StatusOK, res )

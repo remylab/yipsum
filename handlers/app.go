@@ -21,6 +21,10 @@ var (
 // Route handlers
 
 // URI = "/"
+func  (h *Handler)Ipsum(c echo.Context) error {
+    return c.Render(http.StatusOK, "index",nil)
+}
+// URI = "/ipsum-uri"
 func  (h *Handler)Index(c echo.Context) error {
     return c.Render(http.StatusOK, "index",nil)
 }

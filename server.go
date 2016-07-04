@@ -48,9 +48,11 @@ func main() {
 
     // Routes
     e.GET("/", h.Index)
+    e.GET("/:ipsum-uri", h.Ipsum)
     e.GET("/api/checkname", h.CheckName)
     e.GET("/api/checkname/:uri", h.CheckName)
 
+    // FIXME : should be POST
     e.GET("/api/createipsum", h.CreateIpsum)
 
 

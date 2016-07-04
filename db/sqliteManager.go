@@ -46,6 +46,36 @@ func (m *SqliteManager) Close() error {
     return m.db.Close()
 }
 
+/*
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    uri TEXT NOT NULL,
+    desc TEXT,
+    adminKey TEXT NOT NULL,
+    newAdminKey,
+    adminEmail TEXT NOT NULL,
+    newAdminEmail,
+    created INTEGER
+*/
+func (m *SqliteManager) GetIpsum(s string) (map[string]*string, error) {
+
+    s1,s2 := "", ""
+    ipsumMap := map[string]*string{
+        "name": &s1,
+        "desc": &s2,
+    }
+
+    stmt, err := m.db.Prepare("select name, desc from ipsums where uri = ?")
+    if err != nil {return ipsumMap, err}
+    defer stmt.Close()
+
+    err = stmt.QueryRow(s).Scan(ipsumMap["name"],ipsumMap["desc"])
+    if err != nil {return ipsumMap, err}
+
+    fmt.Printf("name %v desc %v", *ipsumMap["name"], *ipsumMap["desc"])
+    return ipsumMap, nil
+}
+
 func (m *SqliteManager) CheckUri(s string) (bool,error) {
 
     stmt, err := m.db.Prepare("select count(1) count from ipsums where uri = ?")
@@ -60,11 +90,10 @@ func (m *SqliteManager) CheckUri(s string) (bool,error) {
     return (count==0), nil
 }
 
-
 func (m *SqliteManager) CreateIpsum(name string, desc string, uri string, adminEmail string) (sqlRes, error) {
 
     ret := sqlRes{false,""}
-    adminKey := common.RandomString(5);
+    adminKey := common.RandomString(7);
 
     stmt, err := m.db.Prepare("INSERT INTO ipsums(name,desc,uri,adminEmail,adminKey) VALUES(?,?,?,?,?)")
     defer stmt.Close()
@@ -73,6 +102,7 @@ func (m *SqliteManager) CreateIpsum(name string, desc string, uri string, adminE
     res, err := stmt.Exec(name,desc,uri,adminEmail,adminKey)
     if err != nil {
         sqliteError := err.Error()
+        //fmt.Printf("createIpsum sqlite err : %v",sqliteError)
         i := strings.Index(sqliteError,"UNIQUE constraint failed")
         if ( i > -1 ) {
             ret.Msg = "taken"
