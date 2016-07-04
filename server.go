@@ -22,17 +22,19 @@ func checkErr(err error) {
 
 func main() {
 
-    fmt.Printf("%v","starting...")
+    fmt.Printf("%v\n","starting...")
 
     e := echo.New()
     e.Static("/static", "public/assets")
+    e.File("/favicon.ico", "public/assets/images/favicon.ico")
+
     e.Pre(middleware.RemoveTrailingSlash())
     // templates
     e.SetRenderer(common.GetTemplate())
     // custom error handling
     e.SetHTTPErrorHandler(handlers.ErrorHandler)
 
-    dbm, dbmErr  := db.NewSqliteManager(common.GetRootPath()+"/yipsum.db")
+    dbm, dbmErr  := db.NewSqliteManager(common.GetRootPath()+"/work/yipsum.db")
     h := &handlers.Handler{dbm}
 
     // middleware : check critical parts 
@@ -48,7 +50,7 @@ func main() {
 
     // Routes
     e.GET("/", h.Index)
-    e.GET("/:ipsum-uri", h.Ipsum)
+    e.GET("/:uri", h.Ipsum)
     e.GET("/api/checkname", h.CheckName)
     e.GET("/api/checkname/:uri", h.CheckName)
 

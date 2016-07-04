@@ -20,11 +20,21 @@ var (
 
 // Route handlers
 
-// URI = "/"
-func  (h *Handler)Ipsum(c echo.Context) error {
-    return c.Render(http.StatusOK, "index",nil)
-}
 // URI = "/ipsum-uri"
+func  (h *Handler)Ipsum(c echo.Context) error {
+    ipsumMap, err := h.Dbm.GetIpsum( c.Param("uri") )
+    
+    if ( err != nil ) {
+        return echo.NewHTTPError(http.StatusNotFound, err.Error())
+    }
+
+    model := map[string]interface{}{
+        "ipsum": ipsumMap,
+    }
+    return c.Render(http.StatusOK, "ipsum", model)
+}
+
+// URI = "/"
 func  (h *Handler)Index(c echo.Context) error {
     return c.Render(http.StatusOK, "index",nil)
 }
@@ -38,7 +48,7 @@ func ErrorHandler(err error, c echo.Context) {
 
         code = he.Code
         msg = he.Message
-        fmt.Printf("err msg :%v\n",msg)
+        fmt.Printf("ErrorHandler msg :%v for URI =%v \n",msg, c.Request().URI())
         switch code {
         case http.StatusNotFound:
             c.Render(code, "404","")

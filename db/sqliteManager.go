@@ -57,22 +57,23 @@ func (m *SqliteManager) Close() error {
     newAdminEmail,
     created INTEGER
 */
-func (m *SqliteManager) GetIpsum(s string) (map[string]*string, error) {
+func (m *SqliteManager) GetIpsum(s string) (map[string]string, error) {
 
-    s1,s2 := "", ""
-    ipsumMap := map[string]*string{
-        "name": &s1,
-        "desc": &s2,
+    
+    ipsumMap := map[string]string{
+        "name": "",
+        "desc": "",
     }
 
     stmt, err := m.db.Prepare("select name, desc from ipsums where uri = ?")
     if err != nil {return ipsumMap, err}
     defer stmt.Close()
 
-    err = stmt.QueryRow(s).Scan(ipsumMap["name"],ipsumMap["desc"])
+    s1,s2 := "", ""
+    err = stmt.QueryRow(s).Scan(&s1,&s2)
     if err != nil {return ipsumMap, err}
-
-    fmt.Printf("name %v desc %v", *ipsumMap["name"], *ipsumMap["desc"])
+    
+    ipsumMap["name"] = s1; ipsumMap["desc"] = s2; 
     return ipsumMap, nil
 }
 

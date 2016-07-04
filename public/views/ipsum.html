@@ -1,4 +1,4 @@
-{{define "index"}}
+{{define "ipsum"}}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -18,7 +18,10 @@
     <![endif]-->
   </head>
   <body>
-    <h1>Welcome to Yipsum!</h1>
+    <h1>Hello: {{index .ipsum "name"}}</h1>
+    <p>
+    {{index .ipsum "desc"}}
+    </p>
 
     <!-- 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
