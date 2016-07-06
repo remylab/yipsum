@@ -6,6 +6,7 @@ import (
     "net/http/httptest"
     "testing"
 
+    "github.com/labstack/echo"
     "github.com/labstack/echo/engine/standard"
 
     "github.com/stretchr/testify/assert"
@@ -40,7 +41,15 @@ func TestIpsum(t *testing.T) {
     c.SetPath("/:uri")
     c.SetParamNames("uri")
     c.SetParamValues("i-dont-exist")
-    assert.Error(t, h.Ipsum(c))
+
+    err := h.Ipsum(c)
+    if( assert.NotNil(t,err) ){
+        he, ok := err.(*echo.HTTPError)
+        if ok {
+            assert.Equal(t, http.StatusNotFound, he.Code)
+        } 
+    }
+
 
 }
 
