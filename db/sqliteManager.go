@@ -69,11 +69,13 @@ func (m *SqliteManager) GetIpsum(s string) (map[string]string, error) {
     if err != nil {return ipsumMap, err}
     defer stmt.Close()
 
-    s1,s2 := "", ""
+    var s1,s2 sql.NullString
     err = stmt.QueryRow(s).Scan(&s1,&s2)
     if err != nil {return ipsumMap, err}
     
-    ipsumMap["name"] = s1; ipsumMap["desc"] = s2; 
+    if ( s1.Valid ) { ipsumMap["name"] = s1.String }; 
+    if ( s2.Valid ) { ipsumMap["desc"] = s2.String }; 
+
     return ipsumMap, nil
 }
 
