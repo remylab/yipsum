@@ -49,7 +49,7 @@ func ErrorHandler(err error, c echo.Context) {
 
         code = he.Code
         msg = he.Message
-        fmt.Printf("ErrorHandler msg :%v for URI =%v \n",msg, c.Request().URI())
+        fmt.Printf("ErrorHandler code: %v, err: %v for URI =%v \n",code, msg, c.Request().URI())
         switch code {
         case http.StatusNotFound:
             c.Render(code, "404","")
