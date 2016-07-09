@@ -26,7 +26,7 @@ func TestIpsum(t *testing.T) {
     e, req, rec := test.GetEcho(), new(http.Request), httptest.NewRecorder()
     c := e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
 
-    c.SetPath("/:uri")
+    c.SetPath("/:ipsum")
     c.SetParamNames("uri")
     c.SetParamValues("jon-snow")
     
@@ -38,7 +38,7 @@ func TestIpsum(t *testing.T) {
     req, rec =  new(http.Request), httptest.NewRecorder()
     c = e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
 
-    c.SetPath("/:uri")
+    c.SetPath("/:ipsum")
     c.SetParamNames("uri")
     c.SetParamValues("i-dont-exist")
 

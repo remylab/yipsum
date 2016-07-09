@@ -40,17 +40,18 @@ func main() {
 
     // check auth for admin section
     store := sessions.NewCookieStore([]byte(common.GetSessionKey()))
-    store.Options.MaxAge = 3600 * 2
+    store.Options.MaxAge = 60 * 10
 
     // Routes
     e.GET("/", h.Index)
-    e.GET("/:uri", h.Ipsum)
-    e.GET("/:uri/adm",h.Index)
-    e.GET("/:uri/adm/:key", h.IpsumAdmin, middle.AdminAuth(dbm, store) )
+    e.GET("/:ipsum", h.Ipsum)
+    e.GET("/:ipsum/adm",h.Index)
+    e.GET("/:ipsum/adm/:key", h.IpsumAdmin, middle.CheckAdminAuth(dbm, store) )
 
     e.GET("/api/checkname", h.CheckName)
-    e.GET("/api/checkname/:uri", h.CheckName)
+    e.GET("/api/checkname/:ipsum", h.CheckName)
     e.GET("/api/createipsum", h.CreateIpsum)// FIXME : should be POST
+    e.GET("/api/:ipsum/addtext", h.Index, middle.CheckAdminAuth(dbm, store) )// FIXME : should be POST
 
 
     /*// (LINUX ONLY) don't drop connections with stop restart

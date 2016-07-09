@@ -23,7 +23,7 @@ var (
 // URI = "/ipsum-uri"
 func  (h *Handler)Ipsum(c echo.Context) error {
 
-    fmt.Printf("hello /:uri handler\n")
+    fmt.Printf("hello /:ipsum handler\n")
     ipsumMap, err := h.Dbm.GetIpsum( c.Param("uri") )
     
     if ( err != nil ) {
@@ -41,7 +41,7 @@ func  (h *Handler)Index(c echo.Context) error {
     return c.Render(http.StatusOK, "index",nil)
 }
 
-// URI = "/:uri/adm/:key"
+// URI = "/:ipsum/adm/:key"
 func  (h *Handler)IpsumAdmin(c echo.Context) error {
     return c.Render(http.StatusOK, "ipdumAdm",nil)
 }

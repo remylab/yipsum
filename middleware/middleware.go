@@ -25,59 +25,75 @@ func CheckDatabase(err error) echo.MiddlewareFunc {
     }
 }
 
-func AdminAuth(dbm db.DbManager, store *sessions.CookieStore) echo.MiddlewareFunc {
+func CheckAdminAuth(dbm db.DbManager, store *sessions.CookieStore) echo.MiddlewareFunc {
     return func(next echo.HandlerFunc) echo.HandlerFunc {
         return func(c echo.Context) error {
 
             req := c.Request()
             uri := req.URI()
-            path := strings.Split(uri,"/")
+            seg := strings.Split(uri,"/")
+            path := c.Path()
 
-            if ( "/:uri/adm/:key" == c.Path() && len(path) == 4 ) {
+            var ipsumUri, ipsumKey string
 
-                ipsumUri := path[1]
-                ipsumKey := path[3]
+            if ( "/:ipsum/adm/:key" == path && len(seg) == 4) {
 
-                isNew,_ := dbm.IsNewUri(ipsumUri) 
+                ipsumUri = seg[1]
+                ipsumKey = seg[3]
 
-                if ( isNew ) {
-                    return echo.NewHTTPError(http.StatusNotFound, "adminAuth check : unknown /:uri")
-                }
+            } else if ("/api/:ipsum/addtext" == path && len(seg) == 4){
+                ipsumUri = seg[2]
+            } else {
+                return next(c)
+            }
+
+            // check if /:ipsum exists
+            isNew, _ := dbm.IsNewUri(ipsumUri)
+            //fmt.Printf("uri :%v, isNew=%v \n",ipsumUri,isNew)
+            if ( isNew ) {
+                return echo.NewHTTPError(http.StatusNotFound, "adminAuth check : unknown /:ipsum")
+            }
+
             
-                rq := req.(*standard.Request)
-                rs := c.Response().(*standard.Response)
+            rq := req.(*standard.Request)
+            rs := c.Response().(*standard.Response)
 
-                session, err := store.Get(rq.Request, "yip")
-                if err != nil {
-                    return echo.NewHTTPError(http.StatusInternalServerError, err.Error() )
-                }
+            session, err := store.Get(rq.Request, "yip")
+            if err != nil {
+                return echo.NewHTTPError(http.StatusInternalServerError, err.Error() )
+            }
 
-                ipsumValidKey := ipsumUri+ipsumKey
+            isValid, ok := session.Values[ipsumUri]
+            if ( !ok ) { isValid = false }
 
-                if ( session.Values[ipsumValidKey] != true ) {
+            switch path {
+                case "/:ipsum/adm/:key":
 
-                    isValid, _ := dbm.ValidateUriKey(ipsumUri,ipsumKey)
+                    if ( !ok ) {
 
-                    if ( isValid ) {
-
-                        session.Values[ipsumValidKey] = true
+                        isValid, _ = dbm.ValidateUriKey(ipsumUri,ipsumKey)
+                        session.Values[ipsumUri] = isValid
                         session.Save(rq.Request, rs.ResponseWriter) 
 
                     } else {
+                        isValid, _ = session.Values[ipsumUri].(bool)
+                    }
 
-                        session.Values[ipsumValidKey] = false
-                        session.Save(rq.Request, rs.ResponseWriter) 
+                    if ( isValid == false ) {
 
-                        // redirect to /:uri/adm
-                        newPath := path[:len(path)-1]
-                        return c.Redirect(http.StatusFound, strings.Join(newPath[:],"/"))
+                        // redirect to /:ipsum/adm
+                        newSeg := seg[:len(seg)-1]
+                        return c.Redirect(http.StatusFound, strings.Join(newSeg[:],"/"))
+                        // Forward // req.SetURI("/good-uri") ; url.SetPath("/good-uri")
 
                     }
 
-                    // Forward // req.SetURI("/good-uri") ; url.SetPath("/good-uri")
 
-                } 
+                case "/api/:ipsum/addtext":
 
+                    if ( isValid == false ) {
+                        return echo.NewHTTPError(http.StatusForbidden, "" )
+                    }
             }
 
             return next(c)
