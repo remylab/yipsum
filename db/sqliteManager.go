@@ -79,9 +79,23 @@ func (m *SqliteManager) GetIpsum(s string) (map[string]string, error) {
     return ipsumMap, nil
 }
 
-func (m *SqliteManager) CheckUri(s string) (bool,error) {
+func (m *SqliteManager) ValidateUriKey(ipsum string, key string) (bool,error) {
 
-    stmt, err := m.db.Prepare("select count(1) count from ipsums where uri = ?")
+    stmt, err := m.db.Prepare("select count(1) from ipsums where uri = ? and adminKey = ?")
+    if err != nil {return false, err}
+    defer stmt.Close()
+
+    var count int
+    err = stmt.QueryRow(ipsum,key).Scan(&count)
+    if err != nil { return false, err }
+
+    return (count==1), nil
+}
+
+
+func (m *SqliteManager) IsNewUri(s string) (bool,error) {
+
+    stmt, err := m.db.Prepare("select count(1) from ipsums where uri = ?")
     if err != nil {return false, err}
     defer stmt.Close()
 

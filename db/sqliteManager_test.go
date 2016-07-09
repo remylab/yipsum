@@ -11,27 +11,27 @@ import (
 
 func TestGetIpsum(t *testing.T) {
 
-    dbm, _ := NewSqliteManager("./TestGetIpsum.db")
-    defer AfterDbTest(dbm,"./TestGetIpsum.db")()
+    dbm, _ := NewSqliteManager("./sqliteManager_test.db")
+    defer AfterDbTest(dbm,"./sqliteManager_test.db")()
 
-    test.LoadTestData("./TestGetIpsum.db","./sqliteManager_test.TestGetIpsum.sql")
+    test.LoadTestData("./sqliteManager_test.db","./sqliteManager_test.TestGetIpsum.sql")
 
     _, err := dbm.GetIpsum("good-uri")
     assert.Nil(t,err)
 }
 
-func TestCheckUri(t *testing.T) {
+func TestIsNewUri(t *testing.T) {
 
-    dbm, _ := NewSqliteManager("./TestCheckUri.db")
-    defer AfterDbTest(dbm,"./TestCheckUri.db")()
+    dbm, _ := NewSqliteManager("./sqliteManager_test.db")
+    defer AfterDbTest(dbm,"./sqliteManager_test.db")()
 
-    test.LoadTestData("./TestCheckUri.db","./sqliteManager_test.TestCheckUri.sql")
+    test.LoadTestData("./sqliteManager_test.db","./sqliteManager_test.TestIsNewUri.sql")
 
-    res, err := dbm.CheckUri("some-free-uri")
+    res, err := dbm.IsNewUri("some-free-uri")
     assert.Nil(t,err)
     assert.Equal(t, res,true,"\"some-free-uri\" should not be in the DB")
 
-    res, err = dbm.CheckUri("some-taken-uri")
+    res, err = dbm.IsNewUri("some-taken-uri")
     assert.Nil(t,err)
     assert.Equal(t, res,false,"\"some-taken-uri\" should be in the DB")
 }
@@ -39,10 +39,10 @@ func TestCheckUri(t *testing.T) {
 
 func TestCreateIpsum(t *testing.T) {
 
-    dbm, _ := NewSqliteManager("./TestCreateIpsum.db")
-    defer AfterDbTest(dbm,"./TestCreateIpsum.db")()
+    dbm, _ := NewSqliteManager("./sqliteManager_test.db")
+    defer AfterDbTest(dbm,"./sqliteManager_test.db")()
 
-    test.LoadTestData("./TestCreateIpsum.db","")
+    test.LoadTestData("./sqliteManager_test.db","")
 
     res, err := dbm.CreateIpsum("les bronzes", "quote du film les bronzes", "les-bronzes", "admin@email.com")
     assert.Nil(t,err)

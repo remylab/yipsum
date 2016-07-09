@@ -4,8 +4,7 @@ import (
     // (LINUX ONLY) "github.com/facebookgo/grace/gracehttp"
 
     "fmt"
-    "strings"
-    "net/http"
+    //"strings"
     "github.com/labstack/echo"
     "github.com/labstack/echo/engine/standard"
     "github.com/labstack/echo/middleware"
@@ -13,6 +12,7 @@ import (
     "github.com/remylab/yipsum/handlers"
     "github.com/remylab/yipsum/db"
     "github.com/remylab/yipsum/common"
+    middle "github.com/remylab/yipsum/middleware"
 
     "github.com/gorilla/sessions"
 )
@@ -36,7 +36,7 @@ func main() {
     h := &handlers.Handler{dbm}
 
     // middleware : check critical parts 
-    e.Pre( checkDatabase(dbmErr) )
+    e.Pre( middle.CheckDatabase(dbmErr) )
 
     // check auth for admin section
     store := sessions.NewCookieStore([]byte(common.GetSessionKey()))
@@ -44,13 +44,13 @@ func main() {
 
     // Routes
     e.GET("/", h.Index)
+    e.GET("/:uri", h.Ipsum)
+    e.GET("/:uri/adm",h.Index)
+    e.GET("/:uri/adm/:key", h.IpsumAdmin, middle.AdminAuth(dbm, store) )
+
     e.GET("/api/checkname", h.CheckName)
     e.GET("/api/checkname/:uri", h.CheckName)
-    e.GET("/:uri", h.Ipsum)
-    e.GET("/:uri/adm/:key", h.Index, adminAuth(dbm, store) )
-
-    // FIXME : should be POST
-    e.GET("/api/createipsum", h.CreateIpsum)
+    e.GET("/api/createipsum", h.CreateIpsum)// FIXME : should be POST
 
 
     /*// (LINUX ONLY) don't drop connections with stop restart
@@ -61,71 +61,3 @@ func main() {
 
 }
 
-func checkDatabase(err error) echo.MiddlewareFunc {
-    return func(next echo.HandlerFunc) echo.HandlerFunc {
-        return func(c echo.Context) error {
-
-            if err != nil {
-                return echo.NewHTTPError(http.StatusInternalServerError, err.Error() )
-            }
-            return next(c)
-        }
-    }
-}
-
-func adminAuth(dbm db.DbManager, store *sessions.CookieStore) echo.MiddlewareFunc {
-    return func(next echo.HandlerFunc) echo.HandlerFunc {
-        return func(c echo.Context) error {
-
-            req := c.Request()
-            uri := req.URI()
-            path := strings.Split(uri,"/")
-
-            if ( "/:uri/adm/:key" == c.Path() && len(path) == 4 ) {
-
-                ipsumUri := path[1]
-                ipsumKey := path[3]
-            
-                rq := req.(*standard.Request)
-                rs := c.Response().(*standard.Response)
-
-                session, err := store.Get(rq.Request, "yip")
-                if err != nil {
-                    return echo.NewHTTPError(http.StatusInternalServerError, err.Error() )
-                }
-
-                ipsumValidKey := ipsumUri+ipsumKey
-                fmt.Printf("session.ipsumValidKey = %v \n",ipsumValidKey)
-                if ( session.Values[ipsumValidKey] != true ) {
-
-                    fmt.Printf("valid key from DB \n")
-
-                    // TODO : isValid := dbm.ValidateUriKey(ipsumUri,ispumKey)
-                    isValid := true
-
-                    if ( isValid ) {
-
-                        session.Values[ipsumValidKey] = true
-                        session.Save(rq.Request, rs.ResponseWriter) 
-
-                    } else {
-
-                        session.Values[ipsumValidKey] = false
-                        session.Save(rq.Request, rs.ResponseWriter) 
-
-                        // redirect to /:uri/adm
-                        newPath := path[:len(path)-1]
-                        return c.Redirect(http.StatusFound, strings.Join(newPath[:],"/"))
-
-                    }
-
-                    // Forward // req.SetURI("/good-uri") ; url.SetPath("/good-uri")
-
-                } 
-
-            }
-
-            return next(c)
-        }
-    }
-}

@@ -29,7 +29,7 @@ func TestCreateIpsum(t *testing.T) {
     e, rec := test.GetEcho(), httptest.NewRecorder()
     q := make(url.Values)
     q.Set("name", "Jon Snow")
-    req, _ := http.NewRequest("GET", "/api/createipsum?"+q.Encode(), nil)
+    req, _ := http.NewRequest("GET", "/?"+q.Encode(), nil)
 
     c := e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
 
@@ -45,7 +45,7 @@ func TestCreateIpsum(t *testing.T) {
     q.Set("name", "Jon Snow")
     q.Set("uri", "jon-snow")
     q.Set("email", "jon@snow.com")
-    req, _ = http.NewRequest("GET", "/api/createipsum?"+q.Encode(), nil)
+    req, _ = http.NewRequest("GET", "/?"+q.Encode(), nil)
     rec = httptest.NewRecorder()
     c = e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
     
@@ -57,7 +57,7 @@ func TestCreateIpsum(t *testing.T) {
     }    
 
 
-    req, _ = http.NewRequest("GET", "/api/createipsum?"+q.Encode(), nil)
+    req, _ = http.NewRequest("GET", "/?"+q.Encode(), nil)
     rec = httptest.NewRecorder()
     c = e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
 
@@ -70,7 +70,7 @@ func TestCreateIpsum(t *testing.T) {
 
 
     q.Set("uri", "jon-snow2")
-    req, _ = http.NewRequest("GET", "/api/createipsum?"+q.Encode(), nil)
+    req, _ = http.NewRequest("GET", "/?"+q.Encode(), nil)
     rec = httptest.NewRecorder()
     c = e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
 

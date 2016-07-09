@@ -19,7 +19,7 @@ type (
 // URI = "/api/checkname"
 func (h *Handler)CheckName(c echo.Context) error {
 
-    ok, _ := h.Dbm.CheckUri( c.Param("uri") )
+    ok, _ := h.Dbm.IsNewUri( c.Param("uri") )
     return c.JSON(http.StatusOK, check{ok,"",nil} )
 }
 
