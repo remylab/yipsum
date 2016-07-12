@@ -46,17 +46,69 @@ func (m *SqliteManager) Close() error {
     return m.db.Close()
 }
 
-/*
-    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    uri TEXT NOT NULL,
-    desc TEXT,
-    adminKey TEXT NOT NULL,
-    newAdminKey,
-    adminEmail TEXT NOT NULL,
-    newAdminEmail,
-    created INTEGER
-*/
+func (m *SqliteManager) UpdateText(dataId int, text string) (sqlRes, error) {
+
+    ret := sqlRes{false,""}
+
+    stmt, err := m.db.Prepare("UPDATE ipsumtext set data=? where id=?")
+    defer stmt.Close()
+    if err != nil {return ret,err}
+
+    res, err := stmt.Exec(text, dataId)
+    if err != nil {return ret,err}
+
+    rowCnt, err := res.RowsAffected()
+    if err != nil {return ret,err}
+
+    return sqlRes{(rowCnt==1),""}, err
+}
+
+func (m *SqliteManager) DeleteText(dataId int) (sqlRes, error) {
+
+    ret := sqlRes{false,""}
+
+    stmt, err := m.db.Prepare("DELETE from ipsumtext where id=?")
+    defer stmt.Close()
+    if err != nil {return ret,err}
+
+    res, err := stmt.Exec(dataId)
+    if err != nil {return ret,err}
+
+    rowCnt, err := res.RowsAffected()
+    if err != nil {return ret,err}
+
+    return sqlRes{(rowCnt==1),""}, err
+}
+
+func (m *SqliteManager) AddText(ipsumId int, text string) (sqlRes, error) {
+
+    ret := sqlRes{false,""}
+
+    _, err :=  m.db.Exec("PRAGMA foreign_keys = ON;")
+    if err != nil {return ret,err}
+
+    stmt, err := m.db.Prepare("INSERT INTO ipsumtext(ipsum_id,data,created) VALUES(?,?,?)")
+    defer stmt.Close()
+    if err != nil {return ret,err}
+
+    created := common.GetTimestamp()
+    res, err := stmt.Exec(ipsumId, text, created)
+    if err != nil {
+        sqliteError := err.Error()
+        i := strings.Index(sqliteError,"FOREIGN KEY constraint failed")
+        if ( i > -1 ) {
+            ret.Msg = "unknown"
+        }
+        return ret, err
+    }
+
+    rowCnt, err := res.RowsAffected()
+    if err != nil {return ret,err}
+
+    return sqlRes{(rowCnt==1),""}, err
+}
+
+
 func (m *SqliteManager) GetIpsum(s string) (map[string]string, error) {
 
     
@@ -112,14 +164,14 @@ func (m *SqliteManager) CreateIpsum(name string, desc string, uri string, adminE
     ret := sqlRes{false,""}
     adminKey := common.RandomString(7);
 
-    stmt, err := m.db.Prepare("INSERT INTO ipsums(name,desc,uri,adminEmail,adminKey) VALUES(?,?,?,?,?)")
+    stmt, err := m.db.Prepare("INSERT INTO ipsums(name,desc,uri,adminEmail,adminKey,created) VALUES(?,?,?,?,?,?)")
     defer stmt.Close()
     if err != nil {return ret,err}
 
-    res, err := stmt.Exec(name,desc,uri,adminEmail,adminKey)
+    created := common.GetTimestamp()
+    res, err := stmt.Exec(name,desc,uri,adminEmail,adminKey,created)
     if err != nil {
         sqliteError := err.Error()
-        //fmt.Printf("createIpsum sqlite err : %v",sqliteError)
         i := strings.Index(sqliteError,"UNIQUE constraint failed")
         if ( i > -1 ) {
             ret.Msg = "taken"

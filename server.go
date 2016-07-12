@@ -40,7 +40,7 @@ func main() {
 
     // check auth for admin section
     store := sessions.NewCookieStore([]byte(common.GetSessionKey()))
-    store.Options.MaxAge = 60 * 10
+    store.Options.MaxAge = 3600 * 2
 
     // Routes
     e.GET("/", h.Index)

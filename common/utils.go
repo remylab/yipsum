@@ -25,6 +25,11 @@ func GetSessionKey() string {
     return os.Getenv("yip_session_key")
 }
 
+
+func GetTimestamp() int32 {
+    return int32(time.Now().Unix())
+}
+
 func GetTemplate() *Template {
     return  &Template{
         templates: template.Must( template.ParseGlob(GetRootPath() + "/public/views/*.html") ),
