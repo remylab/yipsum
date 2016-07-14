@@ -111,7 +111,6 @@ func (m *SqliteManager) AddText(ipsumId int, text string) (sqlRes, error) {
 
 func (m *SqliteManager) GetIpsum(s string) (map[string]string, error) {
 
-    fmt.Printf("GetIpsum for %s \n", s)
     ipsumMap := map[string]string{
         "name": "",
         "desc": "",

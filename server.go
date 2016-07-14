@@ -58,8 +58,8 @@ func main() {
 
     e.GET("/api/checkname", h.CheckName)
     e.GET("/api/checkname/:ipsum", h.CheckName)
-
-    e.POST("/api/s/createipsum", h.CreateIpsum)
+    e.POST("/api/createipsum", h.CreateIpsum)
+    
     e.POST("/api/s/:ipsum/addtext", h.Index )
     e.POST("/api/s/:ipsum/updatetext", h.Index )
     e.POST("/api/s/:ipsum/removetext", h.Index )
