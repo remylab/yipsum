@@ -25,6 +25,10 @@ func GetSessionKey() string {
     return os.Getenv("yip_session_key")
 }
 
+func GetCSRFSecret() string {
+    return os.Getenv("yip_csrf_secret")
+}
+
 
 func GetTimestamp() int32 {
     return int32(time.Now().Unix())

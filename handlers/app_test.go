@@ -21,25 +21,24 @@ func TestIpsum(t *testing.T) {
 
     test.LoadTestData("./TestIpsum.db","./app_test.TestIpsum.sql")
 
-    h = &Handler{dbm}
+    h = &Handler{dbm,nil}
 
     e, req, rec := test.GetEcho(), new(http.Request), httptest.NewRecorder()
     c := e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
 
     c.SetPath("/:ipsum")
-    c.SetParamNames("uri")
+    c.SetParamNames("ipsum")
     c.SetParamValues("jon-snow")
     
     if assert.NoError(t, h.Ipsum(c)) {
         assert.Equal(t, http.StatusOK, rec.Code)
     }
 
-
     req, rec =  new(http.Request), httptest.NewRecorder()
     c = e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
 
     c.SetPath("/:ipsum")
-    c.SetParamNames("uri")
+    c.SetParamNames("ipsum")
     c.SetParamValues("i-dont-exist")
 
     err := h.Ipsum(c)
@@ -55,7 +54,7 @@ func TestIpsum(t *testing.T) {
 
 func TestIndex(t *testing.T) {
 
-    h = &Handler{nil}
+    h = &Handler{nil,nil}
     e, req, rec := test.GetEcho(), new(http.Request), httptest.NewRecorder()
     c := e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
 

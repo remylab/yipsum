@@ -24,7 +24,7 @@ func TestCreateIpsum(t *testing.T) {
 
     test.LoadTestData("./TestCreateIpsum.db","")
 
-    h = &Handler{dbm}
+    h = &Handler{dbm,nil}
 
     e, rec := test.GetEcho(), httptest.NewRecorder()
     q := make(url.Values)
@@ -91,7 +91,7 @@ func TestCheckName(t *testing.T) {
 
     test.LoadTestData("./TestCheckName.db","./api_test.TestCheckName.sql")
 
-    h = &Handler{dbm}
+    h = &Handler{dbm,nil}
 
     e, req, rec := test.GetEcho(), new(http.Request), httptest.NewRecorder()
     c := e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))

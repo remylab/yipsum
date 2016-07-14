@@ -23,7 +23,7 @@ func CheckDatabase(err error) echo.MiddlewareFunc {
             return next(c)
         }
     }
-}
+}   
 
 func CheckAdminAuth(dbm db.DbManager, store *sessions.CookieStore) echo.MiddlewareFunc {
     return func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -41,8 +41,8 @@ func CheckAdminAuth(dbm db.DbManager, store *sessions.CookieStore) echo.Middlewa
                 ipsumUri = seg[1]
                 ipsumKey = seg[3]
 
-            } else if ("/api/:ipsum/addtext" == path && len(seg) == 4){
-                ipsumUri = seg[2]
+            } else if ( strings.HasPrefix(path, "/api/s/:ipsum/") && len(seg) == 5){
+                ipsumUri = seg[3]
             } else {
                 return next(c)
             }
@@ -63,38 +63,32 @@ func CheckAdminAuth(dbm db.DbManager, store *sessions.CookieStore) echo.Middlewa
                 return echo.NewHTTPError(http.StatusInternalServerError, err.Error() )
             }
 
-            isValid, ok := session.Values[ipsumUri]
-            if ( !ok ) { isValid = false }
 
-            switch path {
-                case "/:ipsum/adm/:key":
+            isValid := false
+            val, _ := session.Values[ipsumUri]
+            isValid, _ = val.(bool)
 
-                    if ( !ok ) {
+            if ( path == "/:ipsum/adm/:key" ) {
 
-                        isValid, _ = dbm.ValidateUriKey(ipsumUri,ipsumKey)
-                        session.Values[ipsumUri] = isValid
-                        session.Save(rq.Request, rs.ResponseWriter) 
+                // do not invalidate session if user already *logged in*
+                if ( isValid == false ) {
+                    isValid, _ = dbm.ValidateUriKey(ipsumUri,ipsumKey)
+                    session.Values[ipsumUri] = isValid
+                    session.Save(rq.Request, rs.ResponseWriter)    
+                }
 
-                    } else {
-                        isValid, _ = session.Values[ipsumUri].(bool)
-                    }
+                // redirect to /:ipsum/adm
+                newSeg := seg[:len(seg)-1]
+                return c.Redirect(http.StatusFound, strings.Join(newSeg[:],"/"))
+                // Forward // req.SetURI("/good-uri") ; url.SetPath("/good-uri")
 
-                    if ( isValid == false ) {
+            } else if ( strings.HasPrefix(path, "/api/s/:ipsum/") ) {
 
-                        // redirect to /:ipsum/adm
-                        newSeg := seg[:len(seg)-1]
-                        return c.Redirect(http.StatusFound, strings.Join(newSeg[:],"/"))
-                        // Forward // req.SetURI("/good-uri") ; url.SetPath("/good-uri")
-
-                    }
-
-
-                case "/api/:ipsum/addtext":
-
-                    if ( isValid == false ) {
-                        return echo.NewHTTPError(http.StatusForbidden, "" )
-                    }
+                if ( isValid == false )     {
+                    return echo.NewHTTPError(http.StatusForbidden, "" )
+                }
             }
+
 
             return next(c)
         }

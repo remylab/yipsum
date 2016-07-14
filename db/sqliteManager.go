@@ -111,7 +111,7 @@ func (m *SqliteManager) AddText(ipsumId int, text string) (sqlRes, error) {
 
 func (m *SqliteManager) GetIpsum(s string) (map[string]string, error) {
 
-    
+    fmt.Printf("GetIpsum for %s \n", s)
     ipsumMap := map[string]string{
         "name": "",
         "desc": "",
@@ -141,6 +141,9 @@ func (m *SqliteManager) ValidateUriKey(ipsum string, key string) (bool,error) {
     err = stmt.QueryRow(ipsum,key).Scan(&count)
     if err != nil { return false, err }
 
+
+
+    fmt.Printf("ValidateUriKey %v/%v =%v\n",ipsum, key,(count==1))
     return (count==1), nil
 }
 

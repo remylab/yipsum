@@ -3,14 +3,20 @@ package handlers
 import (
     "fmt"
     "net/http"
+
     "github.com/labstack/echo"
+    "github.com/labstack/echo/engine/standard"
+
     "github.com/remylab/yipsum/db"
+
+    "github.com/gorilla/sessions"
 )
 
 
 type (
     Handler struct {
         Dbm db.DbManager
+        Store *sessions.CookieStore
     }
 )
 var (
@@ -18,13 +24,29 @@ var (
 )
 
 
+
+func isAdmin(c echo.Context, store *sessions.CookieStore) bool {
+
+    rq := c.Request().(*standard.Request)
+    session, err := store.Get(rq.Request, "yip")
+    if err != nil {
+        return false
+    }
+    
+    isValid := false
+    val, _ := session.Values[c.Param("ipsum")]
+    isValid, _ = val.(bool)
+
+    return isValid
+}
+
+
 // Route handlers
 
-// URI = "/ipsum-uri"
+// URI = "/:ipsum"
 func  (h *Handler)Ipsum(c echo.Context) error {
 
-    fmt.Printf("hello /:ipsum handler\n")
-    ipsumMap, err := h.Dbm.GetIpsum( c.Param("uri") )
+    ipsumMap, err := h.Dbm.GetIpsum( c.Param("ipsum") )
     
     if ( err != nil ) {
         return echo.NewHTTPError(http.StatusNotFound, err.Error())
@@ -43,6 +65,7 @@ func  (h *Handler)Index(c echo.Context) error {
 
 // URI = "/:ipsum/adm/:key"
 func  (h *Handler)IpsumAdmin(c echo.Context) error {
+    fmt.Printf("admin %v = %v \n", c.Param("ipsum"), isAdmin(c, h.Store) )
     return c.Render(http.StatusOK, "ipdumAdm",nil)
 }
 

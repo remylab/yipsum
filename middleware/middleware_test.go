@@ -61,7 +61,7 @@ func TestCheckAdminAuth(t *testing.T) {
     session, _ := store.Get(rq.Request, "yip")
 
     assert.Equal(t, http.StatusFound, rec.Code, "admin zone for existing /:ipsum and wrong key should be a 302")
-    assert.Equal(t, "/jon-snow/adm", rec.Header().Get(echo.HeaderLocation), "admin zone for existing /:ipsum and wrong key should redirect to /adm")
+    assert.Equal(t, "/jon-snow/adm", rec.Header().Get(echo.HeaderLocation))
     assert.Equal(t, session.Values["jon-snow"], false)
 
     req, _ = http.NewRequest("GET", "/jon-snow/adm/B0efkloo", nil)
@@ -79,7 +79,8 @@ func TestCheckAdminAuth(t *testing.T) {
     rq = c.Request().(*standard.Request)
     session, _ = store.Get(rq.Request, "yip")
 
-    assert.Equal(t, http.StatusOK, rec.Code, "admin zone should be 200 for good key")
+    assert.Equal(t, http.StatusFound, rec.Code, "admin zone for existing /:ipsum and good key should be a 302")
+    assert.Equal(t, "/jon-snow/adm", rec.Header().Get(echo.HeaderLocation))
     assert.Equal(t, session.Values["jon-snow"], true)
 }
 
@@ -91,11 +92,11 @@ func TestCheckApiAuth(t *testing.T) {
     store := sessions.NewCookieStore([]byte(common.GetSessionKey()))
 
     req, _ := http.NewRequest("GET", "/api/jon-snow/addtext", nil)
-    req.RequestURI = "/api/jon-snow/addtext"
+    req.RequestURI = "/api/s/jon-snow/addtext"
 
     e, rec := test.GetEcho(), httptest.NewRecorder()
     c := e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
-    c.SetPath("/api/:ipsum/addtext")
+    c.SetPath("/api/s/:ipsum/addtext")
 
     h := CheckAdminAuth(dbm,store)(func(c echo.Context) error {
         return nil
@@ -110,11 +111,11 @@ func TestCheckApiAuth(t *testing.T) {
 
 
     req, _ = http.NewRequest("GET", "/api/jon-snow/addtext", nil)
-    req.RequestURI = "/api/jon-snow/addtext"
+    req.RequestURI = "/api/s/jon-snow/addtext"
 
     e, rec = test.GetEcho(), httptest.NewRecorder()
     c = e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
-    c.SetPath("/api/:ipsum/addtext")
+    c.SetPath("/api/s/:ipsum/addtext")
 
     rq := c.Request().(*standard.Request)
     session, _ := store.Get(rq.Request, "yip")
@@ -129,11 +130,11 @@ func TestCheckApiAuth(t *testing.T) {
 
 
     req, _ = http.NewRequest("GET", "/api/jon-snow/addtext", nil)
-    req.RequestURI = "/api/jon-snow/addtext"
+    req.RequestURI = "/api/s/jon-snow/addtext"
 
     e, rec = test.GetEcho(), httptest.NewRecorder()
     c = e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
-    c.SetPath("/api/:ipsum/addtext")
+    c.SetPath("/api/s/:ipsum/addtext")
 
     session.Values["jon-snow"] = "false"
 

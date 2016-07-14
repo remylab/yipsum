@@ -24,34 +24,50 @@ func main() {
     e := echo.New()
     e.Static("/static", "public/assets")
     e.File("/favicon.ico", "public/assets/images/favicon.ico")
-
     e.Pre(middleware.RemoveTrailingSlash())
-    // templates
+
+    // setup templates
     e.SetRenderer(common.GetTemplate())
     // custom error handling
     e.SetHTTPErrorHandler(handlers.ErrorHandler)
 
     // setup DB
     dbm, dbmErr  := db.NewSqliteManager(common.GetRootPath()+"/work/yipsum.db")
-    h := &handlers.Handler{dbm}
 
-    // middleware : check critical parts 
+    // setup session
+    store := sessions.NewCookieStore([]byte(common.GetSessionKey()))
+    store.Options.MaxAge = 3600 * 24
+
+    // setup handler
+    h := &handlers.Handler{dbm, store}
+
+    // check critical parts 
     e.Pre( middle.CheckDatabase(dbmErr) )
 
-    // check auth for admin section
-    store := sessions.NewCookieStore([]byte(common.GetSessionKey()))
-    store.Options.MaxAge = 3600 * 2
+    csrfConfig := middle.CSRFConfig{
+        Secret: []byte(common.GetCSRFSecret()),
+        TokenLookup:   "form:csrfToken ",
+    }
 
     // Routes
     e.GET("/", h.Index)
     e.GET("/:ipsum", h.Ipsum)
-    e.GET("/:ipsum/adm",h.Index)
+
+    e.GET("/:ipsum/adm", h.IpsumAdmin, middle.CSRFWithConfig(csrfConfig))
     e.GET("/:ipsum/adm/:key", h.IpsumAdmin, middle.CheckAdminAuth(dbm, store) )
 
     e.GET("/api/checkname", h.CheckName)
     e.GET("/api/checkname/:ipsum", h.CheckName)
-    e.GET("/api/createipsum", h.CreateIpsum)// FIXME : should be POST
-    e.GET("/api/:ipsum/addtext", h.Index, middle.CheckAdminAuth(dbm, store) )// FIXME : should be POST
+
+    e.POST("/api/s/createipsum", h.CreateIpsum)
+    e.POST("/api/s/:ipsum/addtext", h.Index )
+    e.POST("/api/s/:ipsum/updatetext", h.Index )
+    e.POST("/api/s/:ipsum/removetext", h.Index )
+
+    e.Group("/api/s", 
+        middle.CSRFWithConfig(csrfConfig), 
+        middle.CheckAdminAuth(dbm, store),
+    )
 
 
     /*// (LINUX ONLY) don't drop connections with stop restart
