@@ -51,9 +51,11 @@ func TestCreateIpsum(t *testing.T) {
     
     if assert.NoError(t, h.CreateIpsum(c)) {    
         assert.Equal(t, http.StatusOK, rec.Code)
-        res := &check{true,"",nil}
-        s, _ := json.Marshal(res)
-        assert.Equal(t,string(s),rec.Body.String(),"CreateIpsum with not null name,uri and email should be successful")
+        bytes := []byte(rec.Body.String())
+        var res check
+        json.Unmarshal(bytes, &res)
+        assert.Equal(t, true, res.Ok, "CreateIpsum with not null name,uri and email should be successful")
+        assert.NotNil(t, res.Msg)
     }    
 
 
@@ -76,9 +78,11 @@ func TestCreateIpsum(t *testing.T) {
 
     if assert.NoError(t, h.CreateIpsum(c)) {    
         assert.Equal(t, http.StatusOK, rec.Code)
-        res := &check{true,"",nil}
-        s, _ := json.Marshal(res)
-        assert.Equal(t,string(s),rec.Body.String(),"CreateIpsum bis should be successful")
+        bytes := []byte(rec.Body.String())
+        var res check
+        json.Unmarshal(bytes, &res)
+        assert.Equal(t, true , res.Ok,"CreateIpsum bis should be successful")
+        assert.NotNil(t, res.Msg)
     }    
 
 
@@ -93,29 +97,29 @@ func TestCheckName(t *testing.T) {
 
     h = &Handler{dbm,nil}
 
-    e, req, rec := test.GetEcho(), new(http.Request), httptest.NewRecorder()
+    e, rec := test.GetEcho(), httptest.NewRecorder()
+    q := make(url.Values)
+    q.Set("uri", "some free uri")
+    req, _ := http.NewRequest("GET", "/?"+q.Encode(), nil)
+
     c := e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
 
-    c.SetPath("/api/checkname/:uri")
-    c.SetParamNames("uri")
-    c.SetParamValues("some-free-uri")
     if assert.NoError(t, h.CheckName(c)) {
         assert.Equal(t, http.StatusOK, rec.Code)
 
-        res := &check{true,"",nil}
+        res := &check{true,"some-free-uri",nil}
         s, _ := json.Marshal(res)
         assert.Equal(t,string(s),rec.Body.String())
     }
 
-    req, rec = new(http.Request), httptest.NewRecorder()
+    q.Set("uri", "some-taken-uri")
+    req, _ = http.NewRequest("GET", "/?"+q.Encode(), nil)
+    rec = httptest.NewRecorder()
     c = e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
 
-    c.SetPath("/api/checkname/:uri")
-    c.SetParamNames("uri")
-    c.SetParamValues("some-taken-uri")
     if assert.NoError(t, h.CheckName(c)) {
         assert.Equal(t, http.StatusOK, rec.Code)
-        res := &check{false,"",nil}
+        res := &check{false,"some-taken-uri",nil}
         s, _ := json.Marshal(res)
         assert.Equal(t,string(s),rec.Body.String())
     }

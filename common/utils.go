@@ -4,6 +4,8 @@ import (
     "io"
     "os"
     "time"
+    "strings"
+    "regexp"
     "math/rand"
     "text/template"
 
@@ -44,6 +46,17 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
     return t.templates.ExecuteTemplate(w, name, data)
 }
 
+
+func GetUri(s string) string {
+
+    reg, err := regexp.Compile("[^A-Za-z0-9]+")
+    if err != nil {return ""}
+
+    uri := reg.ReplaceAllString(s, "-")
+    uri = strings.ToLower(strings.Trim(uri, "-"))
+
+    return uri
+}
 
 func RandomString(strlen int) string {
     rand.Seed(time.Now().UTC().UnixNano())

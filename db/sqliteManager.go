@@ -5,6 +5,7 @@ import (
     "os"
     "strings"
     "database/sql"
+    "html/template"
     _ "github.com/mattn/go-sqlite3"
     "github.com/remylab/yipsum/common"
 )
@@ -162,11 +163,18 @@ func (m *SqliteManager) IsNewUri(s string) (bool,error) {
 func (m *SqliteManager) CreateIpsum(name string, desc string, uri string, adminEmail string) (sqlRes, error) {
 
     ret := sqlRes{false,""}
-    adminKey := common.RandomString(7);
+    adminKey := common.RandomString(7)
+
+    name = template.HTMLEscapeString(name)
+    uri = common.GetUri(uri)
+    desc = template.HTMLEscapeString(desc)
+    adminEmail = template.HTMLEscapeString(adminEmail)
+
+
 
     stmt, err := m.db.Prepare("INSERT INTO ipsums(name,desc,uri,adminEmail,adminKey,created) VALUES(?,?,?,?,?,?)")
-    defer stmt.Close()
     if err != nil {return ret,err}
+    defer stmt.Close()
 
     created := common.GetTimestamp()
     res, err := stmt.Exec(name,desc,uri,adminEmail,adminKey,created)

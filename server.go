@@ -56,7 +56,6 @@ func main() {
     e.GET("/:ipsum/adm/:key", h.IpsumAdmin, middle.CheckAdminAuth(dbm, store) )
 
     e.GET("/api/checkname", h.CheckName)
-    e.GET("/api/checkname/:ipsum", h.CheckName)
     e.POST("/api/createipsum", h.CreateIpsum)
     
     e.POST("/api/s/:ipsum/addtext", h.Index )

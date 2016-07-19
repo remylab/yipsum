@@ -6,6 +6,8 @@ import (
     "net/http"
     "strings"
     "github.com/labstack/echo"
+
+    "github.com/remylab/yipsum/common"
 )
 
 type (
@@ -16,11 +18,16 @@ type (
     }
 )
 
-// URI = "/api/checkname"
+// URI = "/api/checkname/:uri"
 func (h *Handler)CheckName(c echo.Context) error {
 
-    ok, _ := h.Dbm.IsNewUri( c.Param("uri") )
-    return c.JSON(http.StatusOK, check{ok,"",nil} )
+    uri := common.GetUri( c.QueryParam("uri"))
+    if len(strings.TrimSpace(uri)) == 0 {
+        return c.JSON(http.StatusOK, check{false,"missing_params",nil} )
+    }
+
+    ok, _ := h.Dbm.IsNewUri( uri )
+    return c.JSON(http.StatusOK, check{ok, uri, nil} )
 }
 
 func (h *Handler)CreateIpsum(c echo.Context) error {
@@ -59,6 +66,8 @@ func (h *Handler)CreateIpsum(c echo.Context) error {
             } else {
                 res.Msg = "internal_error"
             }
+        } else {
+            res.Msg = createRes.Msg
         }
     }
 
