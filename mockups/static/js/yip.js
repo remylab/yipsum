@@ -205,8 +205,9 @@ var api = {
 
         // ajax call will populate the res variable
         var a = [
-            {ok:true,msg: uri},
-            {ok:false,msg:"internal_error"}
+            {ok:true,msg: uri}, // URI is available 
+            {ok:false,msg:""}, // URI is already used
+            {ok:false,msg:"internal_error"} // Server error
         ];
 
         var res = a[ Math.floor(Math.random()*(a.length)) ]
@@ -223,10 +224,10 @@ var api = {
 
         // ajax call will populate the res variable
         var a = [
-            {ok:true,msg:"Lekjei9"},
-            {ok:false,msg:"taken"},
-            {ok:false,msg:"internal_error"},
-            {ok:false,msg:"missing_params",values:["email","name"]}
+            {ok:true,msg:"Lekjei9"}, // All good, create successful
+            {ok:false,msg:"taken"}, // URI is already used
+            {ok:false,msg:"missing_params",values:["email","name"]}, // Missing params
+            {ok:false,msg:"internal_error"} // Server error
         ];
 
         var res = a[ Math.floor(Math.random()*(a.length)) ]
