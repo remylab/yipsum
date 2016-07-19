@@ -44,16 +44,15 @@ func main() {
     // check critical parts 
     e.Pre( middle.CheckDatabase(dbmErr) )
 
-    csrfConfig := middle.CSRFConfig{
-        Secret: []byte(common.GetCSRFSecret()),
-        TokenLookup:   "form:csrfToken ",
+    csrfConfig := middleware.CSRFConfig{
+        TokenLookup:   "query:csrf ",
     }
 
     // Routes
     e.GET("/", h.Index)
     e.GET("/:ipsum", h.Ipsum)
 
-    e.GET("/:ipsum/adm", h.IpsumAdmin, middle.CSRFWithConfig(csrfConfig))
+    e.GET("/:ipsum/adm", h.IpsumAdmin, middleware.CSRFWithConfig(csrfConfig))
     e.GET("/:ipsum/adm/:key", h.IpsumAdmin, middle.CheckAdminAuth(dbm, store) )
 
     e.GET("/api/checkname", h.CheckName)
@@ -65,7 +64,7 @@ func main() {
     e.POST("/api/s/:ipsum/removetext", h.Index )
 
     e.Group("/api/s", 
-        middle.CSRFWithConfig(csrfConfig), 
+        middleware.CSRFWithConfig(csrfConfig), 
         middle.CheckAdminAuth(dbm, store),
     )
 

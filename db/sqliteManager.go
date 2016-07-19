@@ -140,9 +140,7 @@ func (m *SqliteManager) ValidateUriKey(ipsum string, key string) (bool,error) {
     err = stmt.QueryRow(ipsum,key).Scan(&count)
     if err != nil { return false, err }
 
-
-
-    fmt.Printf("ValidateUriKey %v/%v =%v\n",ipsum, key,(count==1))
+    //fmt.Printf("ValidateUriKey %v/%v =%v\n",ipsum, key,(count==1))
     return (count==1), nil
 }
 

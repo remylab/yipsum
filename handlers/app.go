@@ -63,7 +63,7 @@ func  (h *Handler)Index(c echo.Context) error {
     return c.Render(http.StatusOK, "index",nil)
 }
 
-// URI = "/:ipsum/adm/:key"
+// URI = "/:ipsum/adm/:key" & "/:ipsum/adm"
 func  (h *Handler)IpsumAdmin(c echo.Context) error {
     fmt.Printf("admin %v = %v \n", c.Param("ipsum"), isAdmin(c, h.Store) )
     return c.Render(http.StatusOK, "ipdumAdm",nil)

@@ -1,4 +1,4 @@
-{{define "index"}}
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -29,8 +29,10 @@
                     <div class="form-group">
                         <input type="name" class="form-control" id="name" placeholder="Name">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group has-feedback">
                         <input type="uri" class="form-control" id="uri" placeholder="yipsum.com/<my-awesome-loremipsum>">
+                        <span class="help-block" id="uri-help"></span>
+                        <span class="glyphicon form-control-feedback" id="uri-feedback"></span>
                     </div>
                     <div class="form-group">
                         <input type="desc" class="form-control" id="desc" placeholder="Description">
@@ -38,7 +40,10 @@
                     <div class="form-group">
                         <input type="email" class="form-control" id="email" placeholder="Email (used for admin key recovery only)">
                     </div>
-                    <button type="submit" class="btn btn-default">Go !</button>
+                    <div class="form-group">
+                        <div id="messages" class="help-block"></div>
+                    </div>
+                    <button type="submit" class="btn btn-default">Create <span id="yipurl"><span></button>
                 </form>
             </div>
         </div>
@@ -51,4 +56,3 @@
         
     </body>   
 </html>
-{{end}}

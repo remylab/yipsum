@@ -1,0 +1,11 @@
+.helloyip {
+    padding: 40px 15px;
+    text-align: center;
+}
+
+@media (min-width: 768px) { 
+    .container.index {
+        max-width: 730px;
+    }
+}
+

@@ -19,9 +19,9 @@ import (
 )
 
 func TestCheckAdminAuth(t *testing.T) {
-    dbm, _ := db.NewSqliteManager("./middleware_test.db")
-    defer db.AfterDbTest(dbm,"./middleware_test.db")()
-    test.LoadTestData("./middleware_test.db","./middleware_test.TestCheckAdminAuth.sql")
+    dbm, _ := db.NewSqliteManager("./check_test.db")
+    defer db.AfterDbTest(dbm,"./check_test.db")()
+    test.LoadTestData("./check_test.db","./check_test.TestCheckAdminAuth.sql")
 
     store := sessions.NewCookieStore([]byte(common.GetSessionKey()))
 
@@ -85,9 +85,9 @@ func TestCheckAdminAuth(t *testing.T) {
 }
 
 func TestCheckApiAuth(t *testing.T) {
-    dbm, _ := db.NewSqliteManager("./middleware_test.db")
-    defer db.AfterDbTest(dbm,"./middleware_test.db")()
-    test.LoadTestData("./middleware_test.db","./middleware_test.TestCheckApiAuth.sql")
+    dbm, _ := db.NewSqliteManager("./check_test.db")
+    defer db.AfterDbTest(dbm,"./check_test.db")()
+    test.LoadTestData("./check_test.db","./check_test.TestCheckApiAuth.sql")
 
     store := sessions.NewCookieStore([]byte(common.GetSessionKey()))
 
