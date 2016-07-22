@@ -19,19 +19,33 @@
     </head>
     <body>
         <div class="container index">
-            <div class="row row-yiptext"> 
-                <div class="col-xs-10 col-yiptext">
-                    <div class="yiptext">
-                        Ceci est une phrase de mon lorem ipsum, c'est vraiment une phrase super intéressante et instructive.
-                    </div>
-                    <div class="yiptext-edit" style="display:none;">
-                        <textarea wrap="soft" maxlength="136">Ceci est une phrase de mon lorem ipsum, c'est vraiment une phrase super intéressante et instructive.</textarea>
+            <h1>Admin zone</h1>
+
+            <div class="row row-yiptext-add"> 
+                <label>Add a new quote :</label>
+                <div class="col-xs-10 col-yiptext-add">
+                    <div class="yiptext-add">
+                        <textarea wrap="soft" maxlength="136"></textarea>
                     </div>
                 </div>
-                <div class="col-xs-2 col-edit">
-                    <button type="button" class="btn btn-default btn-edit glyphicon glyphicon-ok" style="display:none;"></button>
-                    <span class="btn btn-default btn-saved glyphicon glyphicon-ok" style="display:none;"></span>
-                    <button type="button" class="btn btn-default glyphicon glyphicon-remove btn-delete" ></button>
+                <div class="col-xs-2 col-btn-add">
+                    <button type="button" class="btn btn-primary btn-md btn-add">Add</button>
+                </div>
+            </div>
+
+            <div class="yiptest-list">
+                <div class="row row-yiptext"> 
+                    <div class="col-xs-10 col-yiptext">
+                        <div class="yiptext" style="display:none;">Ceci est une phrase de mon lorem ipsum, c'est vraiment une phrase super intéressante et instructive.</div>
+                        <div class="yiptext-edit">
+                            <textarea wrap="soft" maxlength="136">Ceci est une phrase de mon lorem ipsum, c'est vraiment une phrase super intéressante et instructive.</textarea>
+                        </div>
+                    </div>
+                    <div class="col-xs-2 col-edit">
+                        <button type="button" class="btn btn-default btn-edit glyphicon glyphicon-ok"></button>
+                        <span class="btn btn-default btn-saved glyphicon glyphicon-ok" style="display:none;"></span>
+                        <button type="button" class="btn btn-default glyphicon glyphicon-remove btn-delete" ></button>
+                    </div>
                 </div>
             </div>
         </div>

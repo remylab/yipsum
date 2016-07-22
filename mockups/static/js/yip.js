@@ -200,32 +200,57 @@ var Admin = (function() {
     "use strict";
     var 
     init,
-    bindUIActions;
+    bindUIActions,
+    onClickEdit;
 
     init = function(){
         bindUIActions();
     };
 
     bindUIActions = function() {
-        $('.yiptext').mouseenter(function() {
-            var $row = $(this).closest('.row-yiptext') 
-            $('.yiptext',$row).hide();
-            $('.yiptext-edit',$row).fadeIn();
-            $('.btn-edit',$row).fadeIn();
+
+        $('.btn-edit').click(onClickEdit);
+
+        $('.btn-add').click(function() {
+
+            var $row = $(this).closest('.row-yiptext-add');
+            var text = $('.yiptext-add textarea',$row).val().trim();
+
+            if ( text.length == 0 ) { return; }
+
+            var lines = '<div class="row row-yiptext">'+
+                '<div class="col-xs-10 col-yiptext">'+
+                    '<div class="yiptext" style="display:none;">'+text+'</div>'+
+                    '<div class="yiptext-edit">'+
+                        '<textarea wrap="soft" maxlength="136">'+text+'</textarea>'+
+                    '</div>'+
+                '</div>'+
+                '<div class="col-xs-2 col-edit">'+
+                    '<button type="button" class="btn btn-default btn-edit glyphicon glyphicon-ok"></button>'+
+                    '<span class="btn btn-default btn-saved glyphicon glyphicon-ok" style="display:none;"></span>'+
+                    '<button type="button" class="btn btn-default glyphicon glyphicon-remove btn-delete" ></button>'+
+                '</div>'+
+            '</div>';
+
+            $('.yiptest-list').prepend(lines);
+            $('.yiptest-list .btn-edit').first().click(onClickEdit);
         });
+    };
 
-        $('.btn-edit').click(function() {
-            var $row = $(this).closest('.row-yiptext') 
-            var t1 = $('.yiptext',$row).html().trim(), t2 = $('.yiptext-edit textarea',$row).val().trim();
-            if ( t1 != t2 ) { 
-                $('.yiptext',$row).html(t2);
+    onClickEdit = function($e) {
 
-                $('.btn-saved',$row).fadeIn(600).delay(1200).fadeOut(600);
-            }
+        var $row = $(this).closest('.row-yiptext') 
+        var t1 = $('.yiptext',$row).html().trim(), t2 = $('.yiptext-edit textarea',$row).val().trim();
+
+        if ( t1 != t2 ) { 
+
+            $('.yiptext',$row).html(t2); 
+
             $('.btn-edit',$row).hide();
-            $('.yiptext',$row).show();
-            $('.yiptext-edit',$row).hide();
-        });
+            $('.btn-saved',$row).fadeIn(800).delay(1200).fadeOut(600).delay(800,function() {
+                $('.btn-edit',$row).show();
+            });
+        }  
     };
 
     return {
