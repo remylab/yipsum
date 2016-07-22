@@ -3,7 +3,7 @@ String.prototype.isEmpty = function() {
 };
 
 var util = {
-    displayFieldHelp:function(el, action = "reset", msg = ""){
+    displayHelp:function(el, action = "reset", msg = ""){
 
         var $g = el.closest('.form-group')
         $i = $g.find('.glyphicon')
@@ -33,7 +33,7 @@ var util = {
             $e = $(this);
 
             if ( $e.val().isEmpty()) {
-                util.displayFieldHelp($e,"error","This field is required");
+                util.displayHelp($e,"error","This field is required");
                 isValid = false
             } else {
 
@@ -41,7 +41,7 @@ var util = {
                 attr = $e.attr('serverval')
                 if (typeof attr !== typeof undefined && attr !== false) { return; }
 
-                util.displayFieldHelp($e);
+                util.displayHelp($e);
             }
         }) 
         return isValid;
@@ -53,7 +53,7 @@ $(function() {
     var $reqFields = $('input[required]','form.validate');
 
     $reqFields.focusin(function(){
-        util.displayFieldHelp($(this));
+        util.displayHelp($(this));
     })
 
     $reqFields.focusout(function(){
@@ -64,7 +64,7 @@ $(function() {
         if (typeof attr !== typeof undefined && attr !== false) { return; }
 
         if ( $e.val().isEmpty() ) {
-            util.displayFieldHelp($e,"error","This field is required");
+            util.displayHelp($e,"error","This field is required");
         }
     })
 });
@@ -100,25 +100,27 @@ var CreateIpsum = (function() {
 
     bindUIActions = function() {
 
+        // Pre poluate URL field from name value
         $name.keyup(function() {
             updateUri($(this).val())
         });
 
+        // Validate URL from DB
         $uri.focusin(function() {
-            util.displayFieldHelp($uri,false)
+            util.displayHelp($uri,false)
             $("#btn-yipurl").html(""); 
         });
-
         $uri.focusout(function() {
             updateUri($(this).val());
 
             if ( !uri.isEmpty() ) {
                 api.checkName(uri, onCheckNameResult);
             } else {
-                util.displayFieldHelp($uri,"error","This field is required");
+                util.displayHelp($uri,"error","This field is required");
             }
         });
 
+        // Create new Yipsum
         $form.submit(function( event ) {
 
             event.preventDefault();
@@ -132,29 +134,32 @@ var CreateIpsum = (function() {
     };
 
     onCheckNameResult = function(res) {
-
         if (res.ok) {
             uri = res.msg
-            util.displayFieldHelp($uri,"success");
+            util.displayHelp($uri,"success");
             $("#btn-yipurl").html("yipsum.com/"+uri);
         } else {
             if ( res.msg == "internal_error") {
-               util.displayFieldHelp($uri,"error","Unexpected error, URL validation failed");
+                util.displayHelp($uri,"error","Unexpected error, URL validation failed");
             } else {
-                util.displayFieldHelp($uri,"error","Sorry this URL is already taken, please choose a new one");
+                util.displayHelp($uri,"error","Sorry this URL is already taken, please choose a new one");
             }
             $("#btn-yipurl").html("");
         }
-
     }
 
     onCreateIpsumResult = function(res){
         var $msg = $( "#messages" );
         if (res.ok) {
 
-            $('.helloyip').hide();
             $('#yipurladm').html("yipsum.com/"+uri+"/adm/"+res.msg).attr('href',"/"+uri+"/adm/"+res.msg);
             $('#yipurl').html("yipsum.com/"+uri).attr('href',"/"+uri);
+
+            var $yipin = $('#yipurladm-in');
+            $yipin.val("http://yipsum.com/"+uri+"/adm/"+res.msg);
+            $yipin.attr('size', $yipin.val().length);
+
+            $('.helloyip').hide();
             $('#createsuccess').fadeIn();
 
         } else {
@@ -162,7 +167,7 @@ var CreateIpsum = (function() {
             $("#btn-yipurl").html("");
             switch(res.msg) {
                 case "taken":
-                    util.displayFieldHelp($uri,"error","Sorry this URL is already taken, please choose a new one")
+                    util.displayHelp($uri,"error","Sorry this URL is already taken, please choose a new one")
                     break;
 
                 case "missing_params":
@@ -188,54 +193,45 @@ var CreateIpsum = (function() {
         init: init,
         bind: bind
     };
+}());
 
+
+var Admin = (function() {
+    "use strict";
+    var 
+    init,
+    bindUIActions;
+
+    init = function(){
+        bindUIActions();
+    };
+
+    bindUIActions = function() {
+        $('.yiptext').mouseenter(function() {
+            var $row = $(this).closest('.row-yiptext') 
+            $('.yiptext',$row).hide();
+            $('.yiptext-edit',$row).fadeIn();
+            $('.btn-edit',$row).fadeIn();
+        });
+
+        $('.btn-edit').click(function() {
+            var $row = $(this).closest('.row-yiptext') 
+            var t1 = $('.yiptext',$row).html().trim(), t2 = $('.yiptext-edit textarea',$row).val().trim();
+            if ( t1 != t2 ) { 
+                $('.yiptext',$row).html(t2);
+
+                $('.btn-saved',$row).fadeIn(600).delay(1200).fadeOut(600);
+            }
+            $('.btn-edit',$row).hide();
+            $('.yiptext',$row).show();
+            $('.yiptext-edit',$row).hide();
+        });
+    };
+
+    return {
+        init: init
+    };
 }());
 
 CreateIpsum.init();
-
-// Mock server 
-var api = {
-    running:{
-        checkName:false,
-        createIpsum:false,
-    },
-    checkName:function(uri, callback){
-        if (api.running.checkName || api.running.createIpsum)  {  return; }
-        console.log("mockserver : /api/checkname");
-
-        // ajax call will populate the res variable
-        var a = [
-            {ok:true,msg: uri}, // URI is available 
-            {ok:false,msg:""}, // URI is already used
-            {ok:false,msg:"internal_error"} // Server error
-        ];
-
-        var res = a[ Math.floor(Math.random()*(a.length)) ]
-
-        api.running.checkName = true;
-        setTimeout(function(){
-            api.running.checkName = false;
-            callback(res);
-        }, 800);
-    },
-    createIpsum:function($form, callback){
-        if (api.running.createIpsum)  {  return; }
-        console.log("mockserver : /api/createipsum");
-
-        // ajax call will populate the res variable
-        var a = [
-            {ok:true,msg:"Lekjei9"}, // All good, create successful
-            {ok:false,msg:"taken"}, // URI is already used
-            {ok:false,msg:"missing_params",values:["email","name"]}, // Missing params
-            {ok:false,msg:"internal_error"} // Server error
-        ];
-
-        var res = a[ Math.floor(Math.random()*(a.length)) ]
-
-        api.running.createIpsum = true;
-        setTimeout(function(){
-            api.running.createIpsum = false;
-            callback(res);
-        }, 800);
-    }
-}
+Admin.init()

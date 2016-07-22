@@ -70,17 +70,19 @@ func CheckAdminAuth(dbm db.DbManager, store *sessions.CookieStore) echo.Middlewa
 
             if ( path == "/:ipsum/adm/:key" ) {
 
-                // do not invalidate session if user already *logged in*
+                // do not re-validate session if user already *logged in*
                 if ( isValid == false ) {
                     isValid, _ = dbm.ValidateUriKey(ipsumUri,ipsumKey)
                     session.Values[ipsumUri] = isValid
                     session.Save(rq.Request, rs.ResponseWriter)    
                 }
 
-                // redirect to /:ipsum/adm
-                newSeg := seg[:len(seg)-1]
-                return c.Redirect(http.StatusFound, strings.Join(newSeg[:],"/"))
-                // Forward // req.SetURI("/good-uri") ; url.SetPath("/good-uri")
+                if ( isValid == false ) {
+                    // redirect to /:ipsum/adm
+                    newSeg := seg[:len(seg)-1]
+                    return c.Redirect(http.StatusFound, strings.Join(newSeg[:],"/"))
+                    // Forward // req.SetURI("/good-uri") ; url.SetPath("/good-uri")
+                } 
 
             } else if ( strings.HasPrefix(path, "/api/s/:ipsum/") ) {
 
@@ -88,7 +90,6 @@ func CheckAdminAuth(dbm db.DbManager, store *sessions.CookieStore) echo.Middlewa
                     return echo.NewHTTPError(http.StatusForbidden, "" )
                 }
             }
-
 
             return next(c)
         }

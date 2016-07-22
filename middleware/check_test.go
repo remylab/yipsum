@@ -19,6 +19,7 @@ import (
 )
 
 func TestCheckAdminAuth(t *testing.T) {
+
     dbm, _ := db.NewSqliteManager("./check_test.db")
     defer db.AfterDbTest(dbm,"./check_test.db")()
     test.LoadTestData("./check_test.db","./check_test.TestCheckAdminAuth.sql")
@@ -35,15 +36,14 @@ func TestCheckAdminAuth(t *testing.T) {
     h := CheckAdminAuth(dbm,store)(func(c echo.Context) error {
         return nil
     })
-    
     err := h(c)
+
     if( assert.NotNil(t,err) ){
         he, ok := err.(*echo.HTTPError)
         if ok {
             assert.Equal(t, http.StatusNotFound, he.Code,"admin zone for unknown URI shoule be 404")
         } 
     }
-
 
     req, _ = http.NewRequest("GET", "/jon-snow/adm/wrong-key", nil)
     req.RequestURI =  "/jon-snow/adm/wrong-key"
@@ -79,12 +79,12 @@ func TestCheckAdminAuth(t *testing.T) {
     rq = c.Request().(*standard.Request)
     session, _ = store.Get(rq.Request, "yip")
 
-    assert.Equal(t, http.StatusFound, rec.Code, "admin zone for existing /:ipsum and good key should be a 302")
-    assert.Equal(t, "/jon-snow/adm", rec.Header().Get(echo.HeaderLocation))
+    assert.Equal(t, http.StatusOK, rec.Code, "admin zone for existing /:ipsum and good key should be a 200")
     assert.Equal(t, session.Values["jon-snow"], true)
 }
 
 func TestCheckApiAuth(t *testing.T) {
+
     dbm, _ := db.NewSqliteManager("./check_test.db")
     defer db.AfterDbTest(dbm,"./check_test.db")()
     test.LoadTestData("./check_test.db","./check_test.TestCheckApiAuth.sql")
