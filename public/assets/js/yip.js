@@ -195,4 +195,97 @@ var CreateIpsum = (function() {
     };
 }());
 
+
+var Admin = (function() {
+    "use strict";
+    var 
+    init,
+    bindUIActions,
+    onClickEdit,
+    onClickAdd,
+    onClickAddResult
+    ;
+
+    init = function(){
+        bindUIActions();
+    };
+
+    bindUIActions = function() {
+
+        $('.btn-edit').click(onClickEdit);
+
+        $('.btn-add').click(function() {
+
+            var $row = $(this).closest('.row-yiptext-add');
+            var text = $('.yiptext-add textarea',$row).val().trim();
+
+            if ( text.length == 0 ) { return; }
+
+            var $e = $('<div class="row row-yiptext">'+
+                '<div class="col-xs-10 col-yiptext">'+
+                    '<div class="yiptext" style="display:none;">'+text+'</div>'+
+                    '<div class="yiptext-edit">'+
+                        '<textarea wrap="soft" maxlength="136">'+text+'</textarea>'+
+                    '</div>'+
+                '</div>'+
+                '<div class="col-xs-2 col-edit">'+
+                    '<button type="button" class="btn btn-default btn-edit glyphicon glyphicon-ok"></button>'+
+                    '<span class="btn btn-default btn-saved glyphicon glyphicon-ok" style="display:none;"></span>'+
+                    '<button type="button" class="btn btn-default glyphicon glyphicon-remove btn-delete" ></button>'+
+                '</div>'+
+            '</div>');
+
+            onClickAdd($e,text);
+        });
+    };
+
+    onClickAdd = function($e,text) {
+        if (api.running.addQuote)  { return; }
+
+        $('.yiptest-list').prepend($e);
+
+        // register Edit event
+        $('.btn-edit', $e).click(onClickEdit);
+
+        api.addQuote( $('#ipsumId').val(), text, $e, onClickAddResult );
+
+    };
+
+    onClickAddResult = function($e, res) {
+        if (res.ok) { return ; }
+
+        if ( res.msg == "forbidden") {
+            $('.col-edit', $e).hide();
+            $('.yiptext-edit', $e).hide().after('<div>Your session has expired, please reload this page to continue </div>');
+            $e.delay(5000).fadeOut();
+        } else {
+            $('.col-edit', $e).hide();
+            $('.yiptext-edit', $e).hide().after('<div>Sorry, server error. Please try again later...</div>');
+            $e.delay(2000).fadeOut();
+        }
+
+    };
+
+    onClickEdit = function($e) {
+
+        var $row = $(this).closest('.row-yiptext') 
+        var t1 = $('.yiptext',$row).html().trim(), t2 = $('.yiptext-edit textarea',$row).val().trim();
+
+        if ( t1 != t2 ) { 
+
+            $('.yiptext',$row).html(t2); 
+
+            $('.btn-edit',$row).hide();
+            $('.btn-saved',$row).fadeIn(800).delay(1200).fadeOut(600).delay(800,function() {
+                $('.btn-edit',$row).show();
+            });
+        }  
+    };
+
+    return {
+        init: init
+    };
+}());
+
 CreateIpsum.init();
+Admin.init()

@@ -201,7 +201,10 @@ var Admin = (function() {
     var 
     init,
     bindUIActions,
-    onClickEdit;
+    onClickEdit,
+    onClickAdd,
+    onClickAddResult
+    ;
 
     init = function(){
         bindUIActions();
@@ -218,7 +221,7 @@ var Admin = (function() {
 
             if ( text.length == 0 ) { return; }
 
-            var lines = '<div class="row row-yiptext">'+
+            var $e = $('<div class="row row-yiptext">'+
                 '<div class="col-xs-10 col-yiptext">'+
                     '<div class="yiptext" style="display:none;">'+text+'</div>'+
                     '<div class="yiptext-edit">'+
@@ -230,11 +233,37 @@ var Admin = (function() {
                     '<span class="btn btn-default btn-saved glyphicon glyphicon-ok" style="display:none;"></span>'+
                     '<button type="button" class="btn btn-default glyphicon glyphicon-remove btn-delete" ></button>'+
                 '</div>'+
-            '</div>';
+            '</div>');
 
-            $('.yiptest-list').prepend(lines);
-            $('.yiptest-list .btn-edit').first().click(onClickEdit);
+            onClickAdd($e,text);
         });
+    };
+
+    onClickAdd = function($e,text) {
+        if (api.running.addQuote)  { return; }
+
+        $('.yiptest-list').prepend($e);
+
+        // register Edit event
+        $('.btn-edit', $e).click(onClickEdit);
+
+        api.addQuote( $('#ipsumId').val(), text, $e, onClickAddResult );
+
+    };
+
+    onClickAddResult = function($e, res) {
+        if (res.ok) { return ; }
+
+        if ( res.msg == "forbidden") {
+            $('.col-edit', $e).hide();
+            $('.yiptext-edit', $e).hide().after('<div>Your session has expired, please reload this page to continue </div>');
+            $e.delay(5000).fadeOut();
+        } else {
+            $('.col-edit', $e).hide();
+            $('.yiptext-edit', $e).hide().after('<div>Sorry, server error. Please try again later...</div>');
+            $e.delay(2000).fadeOut();
+        }
+
     };
 
     onClickEdit = function($e) {

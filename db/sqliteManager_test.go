@@ -52,9 +52,10 @@ func TestAddText(t *testing.T) {
     assert.NotNil(t,err,"foreign key constraints should be violated")
     assert.Equal(t,  "unknown", res.Msg)
 
-    res, err = dbm.AddText(562,"some ipsum text")
+    res, err = dbm.AddText(562, "some ipsum text")
     assert.Nil(t,err,"addText should be succesful for good ipsumId")
     assert.Equal(t,  true, res.Ok)
+    assert.Equal(t, true, len(res.Msg)>0, "res.Msg should contain the lastInsertId")
 }
 
 func TestGetIpsum(t *testing.T) {

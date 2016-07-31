@@ -63,10 +63,38 @@ func  (h *Handler)Index(c echo.Context) error {
     return c.Render(http.StatusOK, "index",nil)
 }
 
-// URI = "/:ipsum/adm/:key" & "/:ipsum/adm"
-func  (h *Handler)IpsumAdmin(c echo.Context) error {
-    fmt.Printf("admin %v = %v \n", c.Param("ipsum"), isAdmin(c, h.Store) )
-    return c.Render(http.StatusOK, "ipdumAdm",nil)
+// URI = "/:ipsum/adm" 
+func  (h *Handler)AdminOff(c echo.Context) error {
+    
+    ipsum := c.Param("ipsum") 
+    ipsumMap, err := h.Dbm.GetIpsum( ipsum )
+    if ( err != nil ) {
+        return echo.NewHTTPError(http.StatusNotFound, err.Error())
+    }
+
+    model := map[string]interface{}{
+        "ipsum": ipsumMap,
+    }
+    return c.Render(http.StatusOK, "adminOff", model)
+}
+// URI = "/:ipsum/adm/:key" 
+func  (h *Handler)Admin(c echo.Context) error {
+    
+    ipsum := c.Param("ipsum") 
+    ipsumMap, err := h.Dbm.GetIpsum( ipsum )
+    if ( err != nil ) {
+        return echo.NewHTTPError(http.StatusNotFound, err.Error())
+    }
+
+    _, csrf := c.Get("csrf").(string)
+
+    model := map[string]interface{}{
+        "ipsumUri": ipsum,
+        "ipsum": ipsumMap,
+        "csrf": csrf,
+    }
+
+    return c.Render(http.StatusOK, "admin", model)
 }
 
 // Errors

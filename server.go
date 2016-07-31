@@ -45,20 +45,24 @@ func main() {
     e.Pre( middle.CheckDatabase(dbmErr) )
 
     csrfConfig := middleware.CSRFConfig{
-        TokenLookup:   "query:csrf ",
+        TokenLookup:   "form:csrf ",
     }
 
     // Routes
     e.GET("/", h.Index)
     e.GET("/:ipsum", h.Ipsum)
 
-    e.GET("/:ipsum/adm", h.IpsumAdmin, middleware.CSRFWithConfig(csrfConfig))
-    e.GET("/:ipsum/adm/:key", h.IpsumAdmin, middle.CheckAdminAuth(dbm, store) )
+    e.GET("/:ipsum/adm", h.AdminOff)
+    
+    e.GET("/:ipsum/adm/:key", h.Admin,  
+        middleware.CSRFWithConfig(csrfConfig), 
+        middle.CheckAdminAuth(dbm, store),
+    )
 
     e.GET("/api/checkname", h.CheckName)
     e.POST("/api/createipsum", h.CreateIpsum)
     
-    e.POST("/api/s/:ipsum/addtext", h.Index )
+    e.POST("/api/s/:ipsum/addtext", h.AddText )
     e.POST("/api/s/:ipsum/updatetext", h.Index )
     e.POST("/api/s/:ipsum/removetext", h.Index )
 

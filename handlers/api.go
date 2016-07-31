@@ -5,6 +5,7 @@ import (
     //"fmt"
     "net/http"
     "strings"
+    "strconv"
     "github.com/labstack/echo"
 
     "github.com/remylab/yipsum/common"
@@ -18,7 +19,27 @@ type (
     }
 )
 
-// URI = "/api/checkname/:uri"
+// POST "/api/s/:ipsum/addtext"
+func (h *Handler)AddText(c echo.Context) error {
+    
+    ipsumMap, err := h.Dbm.GetIpsum( c.Param("ipsum") )
+    if err != nil { return err; }
+
+    ipsumId := ipsumMap["id"]
+    text := c.FormValue("text")
+
+    if len(strings.TrimSpace(text)) == 0  {
+        return c.JSON(http.StatusOK, check{false,"missing_params",nil} )
+    }
+
+    id, _ := strconv.ParseInt(ipsumId, 10, 32)
+    addRes, addErr := h.Dbm.AddText(id, text)
+    if addErr != nil { return addErr; }
+
+    return c.JSON(http.StatusOK, check{addRes.Ok, addRes.Msg, nil} )
+}
+
+// GET "/api/checkname"
 func (h *Handler)CheckName(c echo.Context) error {
 
     uri := common.GetUri( c.QueryParam("uri"))
@@ -30,6 +51,7 @@ func (h *Handler)CheckName(c echo.Context) error {
     return c.JSON(http.StatusOK, check{ok, uri, nil} )
 }
 
+// POST /api/createipsum
 func (h *Handler)CreateIpsum(c echo.Context) error {
 
     res := check{true,"",nil}

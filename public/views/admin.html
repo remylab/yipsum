@@ -1,3 +1,4 @@
+{{define "admin"}}
 <html lang="en">
     <head>
         <meta charset="utf-8">
@@ -51,7 +52,8 @@
         </div>
 
 
-        <input type="hidden" id="ipsum" value="jon-snow">
+        <input type="hidden" id="ipsumId" value="{{.ipsumUri}}">
+        <input type="hidden" id="csrf" value="{{.csrf}}">
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 
@@ -59,3 +61,4 @@
         <script src="/static/js/yip.js"></script>
     </body>
 </html>
+{{end}}

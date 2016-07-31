@@ -18,12 +18,100 @@
 
 .form-group > [class*="col-"] {
     padding-left: 2px !important;
-    padding-right: 2 !important;
+    padding-right: 2px !important;
+}
+
+.row-yiptext {
+    border: solid #343035 1px;
+    border-radius: 8px;
+    background-color:#F3FAFD;
+}
+
+.row-yiptext, .row-yiptext-add { 
+    margin: 8px 0 8px 0;
+    overflow: hidden;
+}
+.row-yiptext textarea {
+    height:64px;
+    margin:2px;
+    width:100%;
+    overflow:hidden;
+    resize:none;
+    background-color: #FCFEFE;
+}
+
+.col-yiptext {
+    background-color:#F3FAFD;
+    padding: 4px !important;
+}
+
+.col-yiptext-add {
+    padding: 4px !important;
+}
+
+.yiptext-add textarea {
+    height:64px;
+    margin:2px;
+    width:100%;
+    overflow:hidden;
+    resize:none;
+    padding: 2px !important;
+}
+.col-add {
+    padding-left: 0px !important;
+}
+
+.btn-edit { 
+    color:#66D01A;
+}
+.btn-edit:hover, .btn-edit:focus { 
+    color:#66D01A;
+    background:white;
+}
+
+.btn-delete {
+    color:#ec7474;
+}
+.btn-delete:hover, .btn-delete:focus { 
+    color:#e53434;
+    background:white;
+}
+.col-edit {
+    padding: 2px 4px !important;
+    text-align: right;
+}
+.col-btn-add {
+    padding: 20px 0px 0 6px !important;
+}
+.btn-add {
+    padding: 6px !important;
+}
+.btn-saved { 
+    color:#66D01A;
+    background-color: #F3FAFD;
+    border:none;
 }
 
 @media (min-width: 768px) { 
-    .container.index {
+    .container {
         max-width: 730px;
+    }
+    .col-edit {
+        padding: 12px 12px !important;
+        text-align: right;
+    }
+    .col-btn-add {
+        padding: 11px 0 0 12px !important;
+        text-align: left;
+    }
+    .btn-add {
+        padding: 8px !important;
+    }
+    .col-add {
+        padding: 2px 4px !important;
+    }
+    .row-yiptext textarea, .yiptext-add textarea {
+        height:48px;
     }
 }
 

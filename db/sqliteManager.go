@@ -4,6 +4,7 @@ import (
     "fmt"
     "os"
     "strings"
+    "strconv"
     "database/sql"
     "html/template"
     _ "github.com/mattn/go-sqlite3"
@@ -47,7 +48,7 @@ func (m *SqliteManager) Close() error {
     return m.db.Close()
 }
 
-func (m *SqliteManager) UpdateText(dataId int, text string) (sqlRes, error) {
+func (m *SqliteManager) UpdateText(dataId int64, text string) (sqlRes, error) {
 
     ret := sqlRes{false,""}
 
@@ -64,7 +65,7 @@ func (m *SqliteManager) UpdateText(dataId int, text string) (sqlRes, error) {
     return sqlRes{(rowCnt==1),""}, err
 }
 
-func (m *SqliteManager) DeleteText(dataId int) (sqlRes, error) {
+func (m *SqliteManager) DeleteText(dataId int64) (sqlRes, error) {
 
     ret := sqlRes{false,""}
 
@@ -81,7 +82,7 @@ func (m *SqliteManager) DeleteText(dataId int) (sqlRes, error) {
     return sqlRes{(rowCnt==1),""}, err
 }
 
-func (m *SqliteManager) AddText(ipsumId int, text string) (sqlRes, error) {
+func (m *SqliteManager) AddText(ipsumId int64, text string) (sqlRes, error) {
 
     ret := sqlRes{false,""}
 
@@ -106,7 +107,11 @@ func (m *SqliteManager) AddText(ipsumId int, text string) (sqlRes, error) {
     rowCnt, err := res.RowsAffected()
     if err != nil {return ret,err}
 
-    return sqlRes{(rowCnt==1),""}, err
+    id, err := res.LastInsertId() 
+    if err != nil {return ret,err}
+    
+    sId := strconv.FormatInt(id, 10)
+    return sqlRes{(rowCnt==1), sId }, err
 }
 
 
@@ -117,16 +122,17 @@ func (m *SqliteManager) GetIpsum(s string) (map[string]string, error) {
         "desc": "",
     }
 
-    stmt, err := m.db.Prepare("select name, desc from ipsums where uri = ?")
+    stmt, err := m.db.Prepare("select id, name, desc from ipsums where uri = ?")
     if err != nil {return ipsumMap, err}
     defer stmt.Close()
 
-    var s1,s2 sql.NullString
-    err = stmt.QueryRow(s).Scan(&s1,&s2)
+    var s1, s2, s3 sql.NullString
+    err = stmt.QueryRow(s).Scan(&s1,&s2,&s3)
     if err != nil {return ipsumMap, err}
     
-    if ( s1.Valid ) { ipsumMap["name"] = s1.String }; 
-    if ( s2.Valid ) { ipsumMap["desc"] = s2.String }; 
+    if ( s1.Valid ) { ipsumMap["id"] = s1.String };
+    if ( s2.Valid ) { ipsumMap["name"] = s2.String }; 
+    if ( s3.Valid ) { ipsumMap["desc"] = s3.String }; 
 
     return ipsumMap, nil
 }
