@@ -86,7 +86,6 @@ var CreateIpsum = (function() {
     onCreateIpsumResult
     ;
 
-
     init = function(){
         bindUIActions();
     };
@@ -130,7 +129,6 @@ var CreateIpsum = (function() {
             }
 
         });
-
     };
 
     onCheckNameResult = function(res) {
@@ -186,7 +184,6 @@ var CreateIpsum = (function() {
             uri = uri.substring(0, uriLength);
         }
         $uri.val( uri );
-
     };
 
     return {
@@ -203,7 +200,8 @@ var Admin = (function() {
     bindUIActions,
     onClickEdit,
     onClickAdd,
-    onClickAddResult
+    onClickAddResult,
+    onClickEditResult
     ;
 
     init = function(){
@@ -251,37 +249,40 @@ var Admin = (function() {
 
     };
 
+    onClickEditResult = function($e, text, res) {
+        if (res.ok) { 
+            $('.yiptext',$e).html(text); 
+
+            $('.btn-edit',$e).hide();
+            $('.btn-saved',$e).fadeIn(800).delay(1200).fadeOut(600).delay(800,function() {
+                $('.btn-edit',$e).show();
+            });
+        } else {
+            $('.msg',$e).html('<div>Sorry, server error. Please try again later...</div>');
+        }
+    };
+
     onClickAddResult = function($e, res) {
         if (res.ok) { 
             $e.attr("data-id",res.msg);
             return ; 
-        }
-
-        if ( res.msg == "forbidden") {
-            $('.col-edit', $e).hide();
-            $('.yiptext-edit', $e).hide().after('<div>Your session has expired, please reload this page to continue </div>');
-            $e.delay(5000).fadeOut();
         } else {
             $('.col-edit', $e).hide();
             $('.yiptext-edit', $e).hide().after('<div>Sorry, server error. Please try again later...</div>');
             $e.delay(2000).fadeOut();
         }
-
     };
 
     onClickEdit = function($e) {
+        if (api.running.editQuote)  { return; }
 
-        var $row = $(this).closest('.row-yiptext') 
-        var t1 = $('.yiptext',$row).html().trim(), t2 = $('.yiptext-edit textarea',$row).val().trim();
+        var $e = $(this).closest('.row-yiptext') 
+        $('.msg',$e).html("");
+
+        var t1 = $('.yiptext',$e).html().trim(), t2 = $('.yiptext-edit textarea',$e).val().trim();
 
         if ( t1 != t2 ) { 
-
-            $('.yiptext',$row).html(t2); 
-
-            $('.btn-edit',$row).hide();
-            $('.btn-saved',$row).fadeIn(800).delay(1200).fadeOut(600).delay(800,function() {
-                $('.btn-edit',$row).show();
-            });
+            api.editQuote($e, t2, onClickEditResult );
         }  
     };
 

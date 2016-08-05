@@ -18,6 +18,27 @@ type (
         Values []string `json:"values"`
     }
 )
+// POST "/api/s/:ipsum/updatetext"
+func (h *Handler)UpdateText(c echo.Context) error {
+
+    ipsumMap, err := h.Dbm.GetIpsum( c.Param("ipsum") )
+    if err != nil { return err; }
+
+    s_ipsumId := ipsumMap["id"]
+    text := c.FormValue("text")
+    s_textId := c.FormValue("id")
+
+    if len(strings.TrimSpace(text)) == 0 || len(strings.TrimSpace(s_textId)) == 0 {
+        return c.JSON(http.StatusOK, check{false,"missing_params",nil} )
+    }
+
+    ipsumId, _ := strconv.ParseInt(s_ipsumId, 10, 32)
+    textId, _ := strconv.ParseInt(s_textId, 10, 32)
+    editRes, editErr := h.Dbm.UpdateText(ipsumId, textId, text)
+    if editErr != nil { return editErr; }
+
+    return c.JSON(http.StatusOK, check{editRes.Ok, editRes.Msg, nil} )
+}
 
 // POST "/api/s/:ipsum/addtext"
 func (h *Handler)AddText(c echo.Context) error {

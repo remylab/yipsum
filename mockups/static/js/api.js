@@ -3,7 +3,30 @@ var api = {
     running:{
         checkName:false,
         createIpsum:false,
-        addQuote:false
+        addQuote:false,
+        editQuote:false
+    },
+    editQuote:function($e, text, callback) {
+        if (api.running.editQuote)  { return; }
+        console.log("mockserver : /api/s/:ipsum/updatetext");
+
+        // ajax call will populate the res variable
+        var a = [
+            {ok:true,msg: ""}, // URI is available 
+            {ok:false,msg:"forbidden"}, // Unknown user
+            {ok:false,msg:"internal_error"}, // Server error
+            {ok:false,msg:"missing_params"}, // frontend is broken
+        ];        
+
+        var res = a[ Math.floor(Math.random()*(a.length)) ]
+
+        api.running.editQuote = true;
+        setTimeout(function(){
+            console.log('res : ' + res.ok + ", " + res.msg);
+            api.running.editQuote = false;
+            callback($e, text, res);
+        }, 600);
+
     },
     addQuote:function(ipsum, text, $e, callback) {
         if (api.running.addQuote)  { return; }

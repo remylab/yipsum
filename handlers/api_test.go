@@ -17,6 +17,46 @@ import (
 
 )
 
+func TestUpdateText(t *testing.T) {
+
+    dbm, _ := db.NewSqliteManager("./TestUpdateText.db")
+    defer db.AfterDbTest(dbm,"./TestUpdateText.db")()
+
+    test.LoadTestData("./TestUpdateText.db","api_test.TestUpdateText.sql")
+
+    h = &Handler{dbm,nil}
+
+    e, rec := test.GetEcho(), httptest.NewRecorder()
+    q := make(url.Values)
+    q.Set("id", "475")
+    q.Set("text", "new updated quote")
+    req, _ := http.NewRequest("POST", "/?"+q.Encode(), nil)
+
+    c := e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
+    c.SetPath("/api/s/:ipsum/updatetext")
+    c.SetParamNames("ipsum")
+    c.SetParamValues("jon-snow")
+
+    if assert.NoError(t, h.UpdateText(c)) {
+        assert.Equal(t, http.StatusOK, rec.Code)
+        res := &check{true,"", nil}
+        s, _ := json.Marshal(res)
+        assert.Equal(t, string(s), rec.Body.String())
+    }
+
+    q = make(url.Values)
+    q.Set("id", "88888888")
+    q.Set("text", "new updated quote")
+    req, _ = http.NewRequest("POST", "/?"+q.Encode(), nil)
+    rec = httptest.NewRecorder()
+
+    c = e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
+
+    c.SetPath("/api/s/:ipsum/addtext")
+    c.SetParamNames("ipsum")
+    c.SetParamValues("i-dont-exist")
+}
+
 func TestAddText(t *testing.T) {
 
     dbm, _ := db.NewSqliteManager("./TestAddText.db")
@@ -93,7 +133,6 @@ func TestCreateIpsum(t *testing.T) {
     c := e.NewContext(standard.NewRequest(req, e.Logger()), standard.NewResponse(rec, e.Logger()))
 
     if assert.NoError(t, h.CreateIpsum(c)) {
-        
         assert.Equal(t, http.StatusOK, rec.Code)
         res := &check{false,"missing_params",[]string{"uri","email"}}
         s, _ := json.Marshal(res)

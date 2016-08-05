@@ -48,15 +48,15 @@ func (m *SqliteManager) Close() error {
     return m.db.Close()
 }
 
-func (m *SqliteManager) UpdateText(dataId int64, text string) (sqlRes, error) {
+func (m *SqliteManager) UpdateText(ipsumId int64, dataId int64, text string) (sqlRes, error) {
 
     ret := sqlRes{false,""}
 
-    stmt, err := m.db.Prepare("UPDATE ipsumtext set data=? where id=?")
+    stmt, err := m.db.Prepare("UPDATE ipsumtext set data=? where ipsum_id=? and id= ?")
     defer stmt.Close()
     if err != nil {return ret,err}
 
-    res, err := stmt.Exec(text, dataId)
+    res, err := stmt.Exec(text, ipsumId, dataId)
     if err != nil {return ret,err}
 
     rowCnt, err := res.RowsAffected()

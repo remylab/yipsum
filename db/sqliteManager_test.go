@@ -17,13 +17,17 @@ func TestUpdateText(t *testing.T) {
 
     test.LoadTestData("./TestUpdateText.db","sqliteManager_test.TestUpdateText.sql")
 
-    res, err := dbm.UpdateText(1,"new ipsum text")
+    res, err := dbm.UpdateText(562, 1,"new ipsum text")
     assert.Nil(t, err)
-    assert.Equal(t, false, res.Ok, "updateText should fail for unknown id")
+    assert.Equal(t, false, res.Ok, "updateText should fail for unknown text-id")
 
-    res, err = dbm.UpdateText(475,"new ipsum text")
+    res, err = dbm.UpdateText(562, 475,"new ipsum text")
     assert.Nil(t, err)
     assert.Equal(t, true, res.Ok, "updateText should work for good id")
+
+    res, err = dbm.UpdateText(888, 475,"new ipsum text")
+    assert.Nil(t, err)
+    assert.Equal(t, false, res.Ok, "updateText should fail for unknown ipsum_id")
 }
 
 func TestDeleteText(t *testing.T) {

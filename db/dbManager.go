@@ -12,6 +12,6 @@ type DbManager interface {
     GetIpsum(s string) (map[string]string, error)
     CreateIpsum(name string, desc string, uri string, adminEmail string) (sqlRes, error)
     AddText(ipsumId int64, text string) (sqlRes, error)
-    UpdateText(dataId int64, text string) (sqlRes, error)
+    UpdateText(ipsumId int64, dataId int64, text string) (sqlRes, error)
     DeleteText(dataId int64) (sqlRes, error)
 }
