@@ -62,7 +62,7 @@ func TestCheckAdminAuth(t *testing.T) {
 
     assert.Equal(t, http.StatusFound, rec.Code, "admin zone for existing /:ipsum and wrong key should be a 302")
     assert.Equal(t, "/jon-snow/adm", rec.Header().Get(echo.HeaderLocation))
-    assert.Equal(t, session.Values["jon-snow"], false)
+    assert.Equal(t, nil, session.Values["jon-snow"])
 
     req, _ = http.NewRequest("GET", "/jon-snow/adm/B0efkloo", nil)
     req.RequestURI =  "/jon-snow/adm/B0efkloo"
@@ -80,7 +80,7 @@ func TestCheckAdminAuth(t *testing.T) {
     session, _ = store.Get(rq.Request, "yip")
 
     assert.Equal(t, http.StatusOK, rec.Code, "admin zone for existing /:ipsum and good key should be a 200")
-    assert.Equal(t, session.Values["jon-snow"], true)
+    assert.Equal(t, "B0efkloo", session.Values["jon-snow"])
 }
 
 func TestCheckApiAuth(t *testing.T) {

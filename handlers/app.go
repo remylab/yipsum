@@ -86,7 +86,7 @@ func  (h *Handler)Admin(c echo.Context) error {
         return echo.NewHTTPError(http.StatusNotFound, err.Error())
     }
 
-    _, csrf := c.Get("csrf").(string)
+    csrf, _ := c.Get("csrf").(string)
 
     model := map[string]interface{}{
         "ipsumUri": ipsum,

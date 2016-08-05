@@ -221,7 +221,7 @@ var Admin = (function() {
 
             if ( text.length == 0 ) { return; }
 
-            var $e = $('<div class="row row-yiptext">'+
+            var $e = $('<div class="row row-yiptext" data-id="">'+
                 '<div class="col-xs-10 col-yiptext">'+
                     '<div class="yiptext" style="display:none;">'+text+'</div>'+
                     '<div class="yiptext-edit">'+
@@ -252,7 +252,10 @@ var Admin = (function() {
     };
 
     onClickAddResult = function($e, res) {
-        if (res.ok) { return ; }
+        if (res.ok) { 
+            $e.attr("data-id",res.msg);
+            return ; 
+        }
 
         if ( res.msg == "forbidden") {
             $('.col-edit', $e).hide();

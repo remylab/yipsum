@@ -44,8 +44,9 @@ func main() {
     // check critical parts 
     e.Pre( middle.CheckDatabase(dbmErr) )
 
-    csrfConfig := middleware.CSRFConfig{
-        TokenLookup:   "form:csrf ",
+    csrfConfig := middle.CSRFConfig{
+        TokenLookup: "form:csrf",
+        CookiePath: "/",
     }
 
     // Routes
@@ -55,22 +56,16 @@ func main() {
     e.GET("/:ipsum/adm", h.AdminOff)
     
     e.GET("/:ipsum/adm/:key", h.Admin,  
-        middleware.CSRFWithConfig(csrfConfig), 
+        middle.CSRFWithConfig(csrfConfig), 
         middle.CheckAdminAuth(dbm, store),
     )
 
     e.GET("/api/checkname", h.CheckName)
     e.POST("/api/createipsum", h.CreateIpsum)
     
-    e.POST("/api/s/:ipsum/addtext", h.AddText )
-    e.POST("/api/s/:ipsum/updatetext", h.Index )
-    e.POST("/api/s/:ipsum/removetext", h.Index )
-
-    e.Group("/api/s", 
-        middleware.CSRFWithConfig(csrfConfig), 
-        middle.CheckAdminAuth(dbm, store),
-    )
-
+    e.POST("/api/s/:ipsum/addtext", h.AddText, middle.CSRFWithConfig(csrfConfig), middle.CheckAdminAuth(dbm, store) )
+    e.POST("/api/s/:ipsum/updatetext", h.Index, middle.CSRFWithConfig(csrfConfig), middle.CheckAdminAuth(dbm, store) )
+    e.POST("/api/s/:ipsum/removetext", h.Index, middle.CSRFWithConfig(csrfConfig), middle.CheckAdminAuth(dbm, store) )
 
     /*// (LINUX ONLY) don't drop connections with stop restart
     std := standard.New(":1424")

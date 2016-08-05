@@ -25,6 +25,30 @@ func CheckDatabase(err error) echo.MiddlewareFunc {
     }
 }   
 
+func isAuthorized(dbm db.DbManager, session *sessions.Session, ipsumUri string, ipsumKey string) bool {
+
+    isValid := false
+    val, ok := session.Values[ipsumUri]
+    storedKey, _ := val.(string)
+
+    if ( len(ipsumKey) == 0 ) {
+        return false
+    }
+
+    // 1st validation or session expired
+    if ( !ok ) {
+        isValid, _ = dbm.ValidateUriKey(ipsumUri,ipsumKey)
+    // Session key is valid
+    } else if ( storedKey == ipsumKey ) {
+        return true
+    // ipsumKey changed, could be after a key reset
+    } else if ( storedKey != ipsumKey ) {
+        isValid, _ = dbm.ValidateUriKey(ipsumUri,ipsumKey)
+    }
+
+    return isValid
+}
+
 func CheckAdminAuth(dbm db.DbManager, store *sessions.CookieStore) echo.MiddlewareFunc {
     return func(next echo.HandlerFunc) echo.HandlerFunc {
         return func(c echo.Context) error {
@@ -36,25 +60,20 @@ func CheckAdminAuth(dbm db.DbManager, store *sessions.CookieStore) echo.Middlewa
 
             var ipsumUri, ipsumKey string
 
+            // Admin page
             if ( "/:ipsum/adm/:key" == path && len(seg) == 4) {
-
                 ipsumUri = seg[1]
                 ipsumKey = seg[3]
-
+            // User API
             } else if ( strings.HasPrefix(path, "/api/s/:ipsum/") && len(seg) == 5){
                 ipsumUri = seg[3]
+                ipsumKey = c.FormValue("key")
+            // This URL should not have been checked...    
             } else {
                 return next(c)
             }
 
-            // check if /:ipsum exists
-            isNew, _ := dbm.IsNewUri(ipsumUri)
-            //fmt.Printf("uri :%v, isNew=%v \n",ipsumUri,isNew)
-            if ( isNew ) {
-                return echo.NewHTTPError(http.StatusNotFound, "adminAuth check : unknown /:ipsum")
-            }
-
-            
+            // Retrieve session
             rq := req.(*standard.Request)
             rs := c.Response().(*standard.Response)
 
@@ -63,31 +82,38 @@ func CheckAdminAuth(dbm db.DbManager, store *sessions.CookieStore) echo.Middlewa
                 return echo.NewHTTPError(http.StatusInternalServerError, err.Error() )
             }
 
+            isValid := isAuthorized(dbm, session, ipsumUri, ipsumKey )
 
-            isValid := false
-            val, _ := session.Values[ipsumUri]
-            isValid, _ = val.(bool)
 
             if ( path == "/:ipsum/adm/:key" ) {
 
-                // do not re-validate session if user already *logged in*
                 if ( isValid == false ) {
-                    isValid, _ = dbm.ValidateUriKey(ipsumUri,ipsumKey)
-                    session.Values[ipsumUri] = isValid
-                    session.Save(rq.Request, rs.ResponseWriter)    
-                }
 
-                if ( isValid == false ) {
-                    // redirect to /:ipsum/adm
-                    newSeg := seg[:len(seg)-1]
-                    return c.Redirect(http.StatusFound, strings.Join(newSeg[:],"/"))
-                    // Forward // req.SetURI("/good-uri") ; url.SetPath("/good-uri")
-                } 
+                    // check if /:ipsum exists
+                    isNew, _ := dbm.IsNewUri(ipsumUri)
+                    //fmt.Printf("uri :%v, isNew=%v \n",ipsumUri,isNew)
+                    if ( isNew ) {
+                        return echo.NewHTTPError(http.StatusNotFound, "adminAuth check : unknown /:ipsum")
+                    } else {
+                        // redirect to /:ipsum/adm
+                        newSeg := seg[:len(seg)-1]
+                        return c.Redirect(http.StatusFound, strings.Join(newSeg[:],"/"))
+                    }
+
+                } else {
+                    session.Values[ipsumUri] = ipsumKey
+                    session.Save(rq.Request, rs.ResponseWriter)    
+                    return next(c)
+                }
 
             } else if ( strings.HasPrefix(path, "/api/s/:ipsum/") ) {
 
                 if ( isValid == false )     {
                     return echo.NewHTTPError(http.StatusForbidden, "" )
+                } else {
+                    session.Values[ipsumUri] = ipsumKey
+                    session.Save(rq.Request, rs.ResponseWriter)    
+                    return next(c)  
                 }
             }
 

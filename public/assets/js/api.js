@@ -11,7 +11,14 @@ var api = {
 
         var res = {ok:false,msg:"internal_error"}
 
-        $.post( "/api/s/"+ipsum+"/addtext", {text:text,csrf:$('#csrf').val()} )
+        var x = window.location.href ;
+        var y = x.split("/");
+        var key = y[y.length-1];
+        $.post( "/api/s/"+ipsum+"/addtext", {
+            text:text,
+            csrf:$('#csrf').val(),
+            key:key
+        })
         .done(function(data) {
             callback($e, data);
         })
