@@ -84,7 +84,7 @@ func (h *Handler)AddText(c echo.Context) error {
 // GET "/api/checkname"
 func (h *Handler)CheckName(c echo.Context) error {
 
-    uri := common.GetUri( c.QueryParam("uri"))
+    uri := common.GetUri(c.QueryParam("uri"))
     if len(strings.TrimSpace(uri)) == 0 {
         return c.JSON(http.StatusOK, check{false,"missing_params",nil} )
     }

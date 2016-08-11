@@ -55,8 +55,8 @@ func CheckAdminAuth(dbm db.DbManager, store *sessions.CookieStore) echo.Middlewa
 
             req := c.Request()
             uri := req.URI()
-            seg := strings.Split(uri,"/")
             path := c.Path()
+            seg := strings.Split(strings.Split(uri,"?")[0],"/")
 
             var ipsumUri, ipsumKey string
 

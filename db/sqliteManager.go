@@ -48,24 +48,6 @@ func (m *SqliteManager) Close() error {
     return m.db.Close()
 }
 
-func (m *SqliteManager) UpdateText(ipsumId int64, dataId int64, text string) (sqlRes, error) {
-
-    ret := sqlRes{false,""}
-
-    stmt, err := m.db.Prepare("UPDATE ipsumtext set data=? where ipsum_id=? and id= ?")
-    defer stmt.Close()
-    if err != nil {return ret,err}
-
-    escText := template.HTMLEscapeString(text)
-    res, err := stmt.Exec(escText, ipsumId, dataId)
-    if err != nil {return ret,err}
-
-    rowCnt, err := res.RowsAffected()
-    if err != nil {return ret,err}
-
-    return sqlRes{(rowCnt==1),""}, err
-}
-
 func (m *SqliteManager) DeleteText(ipsumId int64, dataId int64) (sqlRes, error) {
 
     ret := sqlRes{false,""}
@@ -81,6 +63,24 @@ func (m *SqliteManager) DeleteText(ipsumId int64, dataId int64) (sqlRes, error) 
     if err != nil {return ret,err}
 
     return sqlRes{(rowCnt==1),""}, err
+}
+
+func (m *SqliteManager) UpdateText(ipsumId int64, dataId int64, text string) (sqlRes, error) {
+
+    ret := sqlRes{false,""}
+
+    stmt, err := m.db.Prepare("UPDATE ipsumtext set data=? where ipsum_id=? and id= ?")
+    defer stmt.Close()
+    if err != nil {return ret,err}
+
+    escText := template.HTMLEscapeString(text)
+    res, err := stmt.Exec(escText, ipsumId, dataId)
+    if err != nil {return ret,err}
+
+    rowCnt, err := res.RowsAffected()
+    if err != nil {return ret,err}
+
+    return sqlRes{(rowCnt==1), ""}, err
 }
 
 func (m *SqliteManager) AddText(ipsumId int64, text string) (sqlRes, error) {
@@ -114,7 +114,7 @@ func (m *SqliteManager) AddText(ipsumId int64, text string) (sqlRes, error) {
     if err != nil {return ret,err}
     
     sId := strconv.FormatInt(id, 10)
-    return sqlRes{(rowCnt==1), sId }, err
+    return sqlRes{(rowCnt==1), sId}, err
 }
 
 func (m *SqliteManager)GetIpsumTextsForPage(ipsumId int64, pageNum int, resByPage int) ([]map[string]string, error) {

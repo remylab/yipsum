@@ -1,11 +1,11 @@
 // Server methods
 function getKeyFromURL() {
-    var x = window.location.href;
+    var x = window.location.href.split("?")[0];
     var y = x.split("/");
     return y[y.length-1];
 }
 function getIpsumFromURL() {
-    var x = window.location.href;
+    var x = window.location.href.split("?")[0];
     var y = x.split("/");
     return y[3];
 }
@@ -72,7 +72,7 @@ var api = {
         if (api.running.addQuote)  { return; }
         api.running.addQuote = true;
 
-        var res = {ok:false,msg:"internal_error"}
+        var res = {ok:false, msg:"internal_error"}
 
         $.post( "/api/s/"+api.ispumUri+"/addtext", {
             text:text,

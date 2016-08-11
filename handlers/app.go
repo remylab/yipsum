@@ -113,15 +113,16 @@ func ErrorHandler(err error, c echo.Context) {
     msg := http.StatusText(code)
     he, ok := err.(*echo.HTTPError)
     if ok {
-
         code = he.Code
         msg = he.Message
+
         fmt.Printf("ErrorHandler code: %v, err: %v for URI =%v \n",code, msg, c.Request().URI())
+        
         switch code {
-        case http.StatusNotFound:
-            c.Render(code, "404","")
-        default:
-             c.String(code, msg)
+            case http.StatusNotFound:
+                c.Render(code, "404","")
+            default:
+                 c.String(code, msg)
         }
     }
 }

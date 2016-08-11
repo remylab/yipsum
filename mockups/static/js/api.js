@@ -1,8 +1,5 @@
 // Mock server 
 var api = {
-    ipsumKey:getKeyFromURL(),
-    ispumUri:getIpsumFromURL(),
-    
     running:{
         checkName:false,
         createIpsum:false,
