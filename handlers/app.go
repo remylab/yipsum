@@ -3,6 +3,7 @@ package handlers
 import (
     "fmt"
     "net/http"
+    "strconv"
 
     "github.com/labstack/echo"
     "github.com/labstack/echo/engine/standard"
@@ -88,10 +89,19 @@ func  (h *Handler)Admin(c echo.Context) error {
 
     csrf, _ := c.Get("csrf").(string)
 
+    ipsumId, _ := strconv.ParseInt(ipsumMap["id"], 10, 32)
+    yiptexts, _ := h.Dbm.GetIpsumTextsForPage(ipsumId, 1, 20)
+
+    type Yiptext struct {
+        Dbm db.DbManager
+        Store *sessions.CookieStore
+    }
+
     model := map[string]interface{}{
+        "csrf": csrf,
         "ipsumUri": ipsum,
         "ipsum": ipsumMap,
-        "csrf": csrf,
+        "texts":yiptexts,
     }
 
     return c.Render(http.StatusOK, "admin", model)
@@ -111,7 +121,7 @@ func ErrorHandler(err error, c echo.Context) {
         case http.StatusNotFound:
             c.Render(code, "404","")
         default:
-            c.Render(code, "404",msg)
+             c.String(code, msg)
         }
     }
 }

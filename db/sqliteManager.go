@@ -56,7 +56,8 @@ func (m *SqliteManager) UpdateText(ipsumId int64, dataId int64, text string) (sq
     defer stmt.Close()
     if err != nil {return ret,err}
 
-    res, err := stmt.Exec(text, ipsumId, dataId)
+    escText := template.HTMLEscapeString(text)
+    res, err := stmt.Exec(escText, ipsumId, dataId)
     if err != nil {return ret,err}
 
     rowCnt, err := res.RowsAffected()
@@ -65,15 +66,15 @@ func (m *SqliteManager) UpdateText(ipsumId int64, dataId int64, text string) (sq
     return sqlRes{(rowCnt==1),""}, err
 }
 
-func (m *SqliteManager) DeleteText(dataId int64) (sqlRes, error) {
+func (m *SqliteManager) DeleteText(ipsumId int64, dataId int64) (sqlRes, error) {
 
     ret := sqlRes{false,""}
 
-    stmt, err := m.db.Prepare("DELETE from ipsumtext where id=?")
+    stmt, err := m.db.Prepare("DELETE from ipsumtext where ipsum_id=? and id= ?")
     defer stmt.Close()
     if err != nil {return ret,err}
 
-    res, err := stmt.Exec(dataId)
+    res, err := stmt.Exec(ipsumId, dataId)
     if err != nil {return ret,err}
 
     rowCnt, err := res.RowsAffected()
@@ -94,7 +95,9 @@ func (m *SqliteManager) AddText(ipsumId int64, text string) (sqlRes, error) {
     if err != nil {return ret,err}
 
     created := common.GetTimestamp()
-    res, err := stmt.Exec(ipsumId, text, created)
+
+    escText := template.HTMLEscapeString(text)
+    res, err := stmt.Exec(ipsumId, escText, created)
     if err != nil {
         sqliteError := err.Error()
         i := strings.Index(sqliteError,"FOREIGN KEY constraint failed")
@@ -114,10 +117,43 @@ func (m *SqliteManager) AddText(ipsumId int64, text string) (sqlRes, error) {
     return sqlRes{(rowCnt==1), sId }, err
 }
 
+func (m *SqliteManager)GetIpsumTextsForPage(ipsumId int64, pageNum int, resByPage int) ([]map[string]string, error) {
+
+    stmt, err := m.db.Prepare(" select id, data from ipsumtext where ipsum_id = ? limit ? offset ?;")
+    if err != nil {return nil, err}
+    defer stmt.Close()
+
+    nbOffset := (pageNum-1) * resByPage
+    rows, err := stmt.Query(ipsumId, resByPage, nbOffset)
+    if err != nil {return nil, err}
+    defer rows.Close()
+
+    var id , data string
+
+    texts := make([]map[string]string, 0)
+    nbTexts := 0
+    for rows.Next() {
+        err := rows.Scan(&id, &data)
+        if err != nil {return nil, err}
+        t := map[string]string{
+            "id": id,
+            "text": data,
+        }
+        texts = append(texts,t)
+        nbTexts++
+    }
+
+    if err = rows.Err(); err != nil {
+        return nil, err
+    }
+
+    return texts, nil
+}
 
 func (m *SqliteManager) GetIpsum(s string) (map[string]string, error) {
 
     ipsumMap := map[string]string{
+        "id": "",
         "name": "",
         "desc": "",
     }

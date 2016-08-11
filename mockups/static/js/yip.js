@@ -199,9 +199,11 @@ var Admin = (function() {
     init,
     bindUIActions,
     onClickEdit,
+    onEditResult,
     onClickAdd,
-    onClickAddResult,
-    onClickEditResult
+    onAddResult,
+    onClickDelete,
+    onDeleteResult
     ;
 
     init = function(){
@@ -209,6 +211,8 @@ var Admin = (function() {
     };
 
     bindUIActions = function() {
+
+        $('.btn-delete').click(onClickDelete);
 
         $('.btn-edit').click(onClickEdit);
 
@@ -225,6 +229,7 @@ var Admin = (function() {
                     '<div class="yiptext-edit">'+
                         '<textarea wrap="soft" maxlength="136">'+text+'</textarea>'+
                     '</div>'+
+                    '<div class="msg"></div>'+
                 '</div>'+
                 '<div class="col-xs-2 col-edit">'+
                     '<button type="button" class="btn btn-default btn-edit glyphicon glyphicon-ok"></button>'+
@@ -237,38 +242,45 @@ var Admin = (function() {
         });
     };
 
+
+    onClickDelete = function() {
+        var $e = $(this).closest('.row-yiptext') 
+        api.deleteQuote($e, onDeleteResult)
+    };
+    onDeleteResult = function($e, res) {
+        if (res.ok) { 
+            $e.hide();
+        } else {
+            $('.msg',$e).html('Sorry, server error. Please try again later...');
+            $('.yiptext-edit textarea',$e).val(t1);
+
+            setTimeout(function() {
+                $('.msg',$e).html("");
+                $('.btn-saved',$e).fadeOut(600,function(){
+                    $('.btn-edit',$e).show()
+                });;
+            }, 2000);
+        }
+    };
+    
     onClickAdd = function($e,text) {
         if (api.running.addQuote)  { return; }
 
         $('.yiptest-list').prepend($e);
 
-        // register Edit event
+        // register events
         $('.btn-edit', $e).click(onClickEdit);
+        $('.btn-delete', $e).click(onClickDelete);
 
-        api.addQuote( $('#ipsumId').val(), text, $e, onClickAddResult );
-
+        api.addQuote($e, text, onAddResult);
     };
-
-    onClickEditResult = function($e, text, res) {
-        if (res.ok) { 
-            $('.yiptext',$e).html(text); 
-
-            $('.btn-edit',$e).hide();
-            $('.btn-saved',$e).fadeIn(800).delay(1200).fadeOut(600).delay(800,function() {
-                $('.btn-edit',$e).show();
-            });
-        } else {
-            $('.msg',$e).html('<div>Sorry, server error. Please try again later...</div>');
-        }
-    };
-
-    onClickAddResult = function($e, res) {
+    onAddResult = function($e, res) {
         if (res.ok) { 
             $e.attr("data-id",res.msg);
             return ; 
         } else {
             $('.col-edit', $e).hide();
-            $('.yiptext-edit', $e).hide().after('<div>Sorry, server error. Please try again later...</div>');
+            $('.msg', $e).hide().after('Sorry, server error. Please try again later...');
             $e.delay(2000).fadeOut();
         }
     };
@@ -282,8 +294,32 @@ var Admin = (function() {
         var t1 = $('.yiptext',$e).html().trim(), t2 = $('.yiptext-edit textarea',$e).val().trim();
 
         if ( t1 != t2 ) { 
-            api.editQuote($e, t2, onClickEditResult );
+            api.editQuote($e, t1, t2, onEditResult );
+            $('.btn-edit', $e).hide();
+            $('.btn-saved', $e).fadeIn(800);
         }  
+    };
+    onEditResult = function($e, t1, t2, res) {
+        if (res.ok) { 
+            $('.yiptext',$e).html(t2); 
+
+            $('.btn-saved').fadeOut(600);
+
+            setTimeout(function() {
+                $('.btn-edit',$e).show();
+            }, 2000);
+
+        } else {
+            $('.msg',$e).html('Sorry, server error. Please try again later...');
+            $('.yiptext-edit textarea',$e).val(t1);
+
+            setTimeout(function() {
+                $('.msg',$e).html("");
+                $('.btn-saved',$e).fadeOut(600,function(){
+                    $('.btn-edit',$e).show()
+                });;
+            }, 2000);
+        }
     };
 
     return {

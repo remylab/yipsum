@@ -20,7 +20,7 @@
     </head>
     <body>
         <div class="container index">
-            <h1>Admin zone</h1>
+            <h1>{{index .ipsum "name"}}'s Admin zone</h1>
 
             <div class="row row-yiptext-add"> 
                 <label>Add a new quote :</label>
@@ -35,19 +35,9 @@
             </div>
 
             <div class="yiptest-list">
-                <div class="row row-yiptext"> 
-                    <div class="col-xs-10 col-yiptext">
-                        <div class="yiptext" style="display:none;">Ceci est une phrase de mon lorem ipsum, c'est vraiment une phrase super intéressante et instructive.</div>
-                        <div class="yiptext-edit">
-                            <textarea wrap="soft" maxlength="136">Ceci est une phrase de mon lorem ipsum, c'est vraiment une phrase super intéressante et instructive.</textarea>
-                        </div>
-                    </div>
-                    <div class="col-xs-2 col-edit">
-                        <button type="button" class="btn btn-default btn-edit glyphicon glyphicon-ok"></button>
-                        <span class="btn btn-default btn-saved glyphicon glyphicon-ok" style="display:none;"></span>
-                        <button type="button" class="btn btn-default glyphicon glyphicon-remove btn-delete" ></button>
-                    </div>
-                </div>
+                {{range .texts}}
+                    {{template "yiptext" . }}
+                {{end}}
             </div>
         </div>
 
@@ -62,3 +52,20 @@
     </body>
 </html>
 {{end}}
+
+{{define "yiptext"}}
+    <div class="row row-yiptext" data-id="{{index . "id"}}"> 
+        <div class="col-xs-10 col-yiptext">
+            <div class="yiptext" style="display:none;">{{index . "text"}}</div>
+            <div class="yiptext-edit">
+                <textarea wrap="soft" maxlength="600">{{index . "text"}}</textarea>
+            </div>
+        </div>
+        <div class="col-xs-2 col-edit">
+            <button type="button" class="btn btn-default btn-edit glyphicon glyphicon-ok"></button>
+            <span class="btn btn-default btn-saved glyphicon glyphicon-ok" style="display:none;"></span>
+            <button type="button" class="btn btn-default glyphicon glyphicon-remove btn-delete" ></button>
+        </div>
+    </div>
+{{end}}
+

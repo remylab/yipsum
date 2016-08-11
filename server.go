@@ -44,28 +44,28 @@ func main() {
     // check critical parts 
     e.Pre( middle.CheckDatabase(dbmErr) )
 
+    // Setup security middlewares
     csrfConfig := middle.CSRFConfig{
         TokenLookup: "form:csrf",
         CookiePath: "/",
     }
+    mCsrf := middle.CSRFWithConfig(csrfConfig)
+    mAuth := middle.CheckAdminAuth(dbm, store)
 
-    // Routes
+    // Public Routes
     e.GET("/", h.Index)
     e.GET("/:ipsum", h.Ipsum)
-
     e.GET("/:ipsum/adm", h.AdminOff)
-    
-    e.GET("/:ipsum/adm/:key", h.Admin,  
-        middle.CSRFWithConfig(csrfConfig), 
-        middle.CheckAdminAuth(dbm, store),
-    )
 
     e.GET("/api/checkname", h.CheckName)
     e.POST("/api/createipsum", h.CreateIpsum)
     
-    e.POST("/api/s/:ipsum/addtext", h.AddText, middle.CSRFWithConfig(csrfConfig), middle.CheckAdminAuth(dbm, store) )
-    e.POST("/api/s/:ipsum/updatetext", h.Index, middle.CSRFWithConfig(csrfConfig), middle.CheckAdminAuth(dbm, store) )
-    e.POST("/api/s/:ipsum/removetext", h.Index, middle.CSRFWithConfig(csrfConfig), middle.CheckAdminAuth(dbm, store) )
+    // Secure User Routes
+    e.GET("/:ipsum/adm/:key", h.Admin, mCsrf, mAuth)
+    // API
+    e.POST("/api/s/:ipsum/addtext", h.AddText, mCsrf, mAuth)
+    e.POST("/api/s/:ipsum/updatetext", h.UpdateText, mCsrf, mAuth)
+    e.POST("/api/s/:ipsum/deletetext", h.DeleteText, mCsrf, mAuth)
 
     /*// (LINUX ONLY) don't drop connections with stop restart
     std := standard.New(":1424")

@@ -10,8 +10,10 @@ type DbManager interface {
     ValidateUriKey(ipsum string, key string) (bool,error)
 
     GetIpsum(s string) (map[string]string, error)
+    GetIpsumTextsForPage(ipsumId int64, pageNum int, resByPage int) ([]map[string]string, error)
+
     CreateIpsum(name string, desc string, uri string, adminEmail string) (sqlRes, error)
     AddText(ipsumId int64, text string) (sqlRes, error)
     UpdateText(ipsumId int64, dataId int64, text string) (sqlRes, error)
-    DeleteText(dataId int64) (sqlRes, error)
+    DeleteText(ipsumId int64, dataId int64) (sqlRes, error)
 }

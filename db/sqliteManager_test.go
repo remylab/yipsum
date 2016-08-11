@@ -37,12 +37,16 @@ func TestDeleteText(t *testing.T) {
 
     test.LoadTestData("./TestDeleteText.db","sqliteManager_test.TestDeleteText.sql")
 
-    res, err := dbm.DeleteText(1)
+    res, err := dbm.DeleteText(562, 1)
     assert.Equal(t, false, res.Ok)
 
-    res, err = dbm.DeleteText(368)
-    assert.Nil(t,err,"DeleteText should be succesful for good dataId")
+    res, err = dbm.DeleteText(562, 368)
+    assert.Nil(t,err,"DeleteText should be succesful for good ipsumId, dataId")
     assert.Equal(t,  true, res.Ok)
+
+    res, err = dbm.DeleteText(888, 368)
+    assert.Nil(t,err,"DeleteText should be KO for bad ipsumId and good dataId")
+    assert.Equal(t,  false, res.Ok)
 }
 
 func TestAddText(t *testing.T) {
