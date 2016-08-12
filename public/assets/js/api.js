@@ -2,7 +2,7 @@
 function getKeyFromURL() {
     var x = window.location.href.split("?")[0];
     var y = x.split("/");
-    return y[y.length-1];
+    return y[5];
 }
 function getIpsumFromURL() {
     var x = window.location.href.split("?")[0];

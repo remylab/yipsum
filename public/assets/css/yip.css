@@ -32,7 +32,6 @@
     overflow: hidden;
 }
 .row-yiptext textarea {
-    height:64px;
     margin:2px;
     width:100%;
     overflow:hidden;
@@ -50,13 +49,17 @@
 }
 
 .yiptext-add textarea {
-    height:64px;
     margin:2px;
     width:100%;
     overflow:hidden;
     resize:none;
     padding: 2px !important;
 }
+
+.row-yiptext textarea, .yiptext-add textarea {
+    height:116px;
+}
+
 .col-add {
     padding-left: 0px !important;
 }
@@ -111,7 +114,7 @@
         padding: 2px 4px !important;
     }
     .row-yiptext textarea, .yiptext-add textarea {
-        height:48px;
+        height:80px;
     }
 }
 

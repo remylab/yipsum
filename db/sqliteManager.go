@@ -117,9 +117,22 @@ func (m *SqliteManager) AddText(ipsumId int64, text string) (sqlRes, error) {
     return sqlRes{(rowCnt==1), sId}, err
 }
 
-func (m *SqliteManager)GetIpsumTextsForPage(ipsumId int64, pageNum int, resByPage int) ([]map[string]string, error) {
+func (m *SqliteManager)GetTotalIpsumTexts(ipsumId int64) (int,error) {
 
-    stmt, err := m.db.Prepare(" select id, data from ipsumtext where ipsum_id = ? limit ? offset ?;")
+    stmt, err := m.db.Prepare("select count(1) total from ipsumtext where ipsum_id = ?")
+    if err != nil {return 0, err}
+    defer stmt.Close()
+
+    var count int
+    err = stmt.QueryRow(ipsumId).Scan(&count)
+    if err != nil {return 0, err}
+
+    return count, nil
+}
+
+func (m *SqliteManager)GetIpsumTextsForPage(ipsumId int64, pageNum int64, resByPage int64) ([]map[string]string, error) {
+
+    stmt, err := m.db.Prepare("select id, data from ipsumtext where ipsum_id = ? limit ? offset ?;")
     if err != nil {return nil, err}
     defer stmt.Close()
 

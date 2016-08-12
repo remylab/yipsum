@@ -4,6 +4,7 @@ import (
     "fmt"
     "net/http"
     "strconv"
+    "math"
 
     "github.com/labstack/echo"
     "github.com/labstack/echo/engine/standard"
@@ -78,9 +79,12 @@ func  (h *Handler)AdminOff(c echo.Context) error {
     }
     return c.Render(http.StatusOK, "adminOff", model)
 }
+
 // URI = "/:ipsum/adm/:key" 
 func  (h *Handler)Admin(c echo.Context) error {
     
+    var pageSize int64 ; pageSize = 50
+
     ipsum := c.Param("ipsum") 
     ipsumMap, err := h.Dbm.GetIpsum( ipsum )
     if ( err != nil ) {
@@ -89,12 +93,22 @@ func  (h *Handler)Admin(c echo.Context) error {
 
     csrf, _ := c.Get("csrf").(string)
 
-    ipsumId, _ := strconv.ParseInt(ipsumMap["id"], 10, 32)
-    yiptexts, _ := h.Dbm.GetIpsumTextsForPage(ipsumId, 1, 20)
+    var nbPage int64; nbPage = 1
+    if page := c.Param("page") ; page != "" {
+        nbPage, _ = strconv.ParseInt(page, 10, 32)
+    }
 
-    type Yiptext struct {
-        Dbm db.DbManager
-        Store *sessions.CookieStore
+    ipsumId, _ := strconv.ParseInt(ipsumMap["id"], 10, 32)
+    yiptexts, _ := h.Dbm.GetIpsumTextsForPage(ipsumId, nbPage, pageSize)
+ 
+    total, _ := h.Dbm.GetTotalIpsumTexts(ipsumId)
+
+    d := float64(total) / float64(pageSize)
+    totalPages := int(math.Ceil(d))
+
+    pages := make(map[int]string) 
+    for i := 1; i <= totalPages; i++ {
+        pages[i] = strconv.Itoa(i)
     }
 
     model := map[string]interface{}{
@@ -102,6 +116,8 @@ func  (h *Handler)Admin(c echo.Context) error {
         "ipsumUri": ipsum,
         "ipsum": ipsumMap,
         "texts":yiptexts,
+        "pages": pages, 
+        "currentPage":nbPage
     }
 
     return c.Render(http.StatusOK, "admin", model)

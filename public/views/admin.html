@@ -34,11 +34,21 @@
                 </div>
             </div>
 
-            <div class="yiptest-list">
-                {{range .texts}}
-                    {{template "yiptext" . }}
-                {{end}}
-            </div>
+            {{ $length := len .texts }} {{ if gt $length 0 }}
+
+                {{template "pagination" .pages }}
+
+                <div class="yiptest-list">
+                    {{range .texts}}
+                        {{template "yiptext" . }}
+                    {{end}}
+                </div>
+
+                {{template "pagination" .pages }}
+
+            {{end}}
+
+
         </div>
 
 
@@ -53,13 +63,26 @@
 </html>
 {{end}}
 
+{{define "pagination"}}
+    {{ $length := len . }} {{ if gt $length 1 }}
+    <div class="row" style="text-align:center;">
+        <ul class="pagination">
+            {{ range $key, $value := . }}
+                <li><a href="{{ $value }}">{{ $value }}</a></li>
+            {{ end }}
+        </ul>
+    </div>
+    {{ end }}
+{{end}}
+
 {{define "yiptext"}}
     <div class="row row-yiptext" data-id="{{index . "id"}}"> 
         <div class="col-xs-10 col-yiptext">
             <div class="yiptext" style="display:none;">{{index . "text"}}</div>
             <div class="yiptext-edit">
-                <textarea wrap="soft" maxlength="600">{{index . "text"}}</textarea>
+                <textarea wrap="soft" maxlength="1000">{{index . "text"}}</textarea>
             </div>
+            <div class="msg"></div>
         </div>
         <div class="col-xs-2 col-edit">
             <button type="button" class="btn btn-default btn-edit glyphicon glyphicon-ok"></button>

@@ -216,29 +216,15 @@ var Admin = (function() {
 
         $('.btn-edit').click(onClickEdit);
 
-        $('.btn-add').click(function() {
+        $('.btn-add').click(function(){ 
+            onClickAdd($(this)); 
+        }); 
 
-            var $row = $(this).closest('.row-yiptext-add');
-            var text = $('.yiptext-add textarea',$row).val().trim();
-
-            if ( text.length == 0 ) { return; }
-
-            var $e = $('<div class="row row-yiptext" data-id="">'+
-                '<div class="col-xs-10 col-yiptext">'+
-                    '<div class="yiptext" style="display:none;">'+escape(text)+'</div>'+
-                    '<div class="yiptext-edit">'+
-                        '<textarea wrap="soft" maxlength="1000">'+text+'</textarea>'+
-                    '</div>'+
-                    '<div class="msg"></div>'+
-                '</div>'+
-                '<div class="col-xs-2 col-edit">'+
-                    '<button type="button" class="btn btn-default btn-edit glyphicon glyphicon-ok"></button>'+
-                    '<span class="btn btn-default btn-saved glyphicon glyphicon-ok" style="display:none;"></span>'+
-                    '<button type="button" class="btn btn-default glyphicon glyphicon-remove btn-delete" ></button>'+
-                '</div>'+
-            '</div>');
-
-            onClickAdd($e,text);
+        $(".yiptext-add textarea").keyup(function(e) {
+            var code = e.keyCode ? e.keyCode : e.which;
+            if (code == 13) {  // Enter keycode
+                onClickAdd($(this))     
+            }
         });
     };
 
@@ -252,7 +238,6 @@ var Admin = (function() {
             $e.hide();
         } else {
             $('.msg',$e).html('Sorry, server error. Please try again later...');
-            $('.yiptext-edit textarea',$e).val(t1);
 
             setTimeout(function() {
                 $('.msg',$e).html("");
@@ -263,7 +248,28 @@ var Admin = (function() {
         }
     };
     
-    onClickAdd = function($e,text) {
+    onClickAdd = function($b) {
+
+        var $row = $b.closest('.row-yiptext-add');
+        var text = $('.yiptext-add textarea',$row).val().trim();
+
+        if ( text.length == 0 ) { return; }
+
+        var $e = $('<div class="row row-yiptext" data-id="">'+
+            '<div class="col-xs-10 col-yiptext">'+
+                '<div class="yiptext" style="display:none;">'+escape(text)+'</div>'+
+                '<div class="yiptext-edit">'+
+                    '<textarea wrap="soft" maxlength="1000">'+text+'</textarea>'+
+                '</div>'+
+                '<div class="msg"></div>'+
+            '</div>'+
+            '<div class="col-xs-2 col-edit">'+
+                '<button type="button" class="btn btn-default btn-edit glyphicon glyphicon-ok"></button>'+
+                '<span class="btn btn-default btn-saved glyphicon glyphicon-ok" style="display:none;"></span>'+
+                '<button type="button" class="btn btn-default glyphicon glyphicon-remove btn-delete" ></button>'+
+            '</div>'+
+        '</div>');
+
         if (api.running.addQuote)  { return; }
 
         $('.yiptest-list').prepend($e);
@@ -297,20 +303,23 @@ var Admin = (function() {
         if ( unescape(t1) != unescape(t2) ) { 
             api.editQuote($e, t1, t2, onEditResult );
             $('.btn-edit', $e).hide();
-            $('.btn-saved', $e).fadeIn(800);
+
+            $('.btn-saved', $e).fadeIn(600);
+            setTimeout(function() {
+                $('.btn-saved').fadeOut(600);
+            }, 600);
         }  
     };
     onEditResult = function($e, t1, t2, res) {
+
+        setTimeout(function() {
+            $('.btn-edit',$e).show();
+        }, 1200);
+
         if (res.ok) { 
 
             var escT2 =  escape(t2);
             $('.yiptext', $e).html(escT2); 
-
-            $('.btn-saved').fadeOut(600);
-
-            setTimeout(function() {
-                $('.btn-edit',$e).show();
-            }, 2000);
 
         } else {
             $('.msg',$e).html('Sorry, server error. Please try again later...');
@@ -318,9 +327,6 @@ var Admin = (function() {
 
             setTimeout(function() {
                 $('.msg',$e).html("");
-                $('.btn-saved',$e).fadeOut(600,function(){
-                    $('.btn-edit',$e).show()
-                });;
             }, 2000);
         }
     };

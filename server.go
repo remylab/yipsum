@@ -59,9 +59,13 @@ func main() {
 
     e.GET("/api/checkname", h.CheckName)
     e.POST("/api/createipsum", h.CreateIpsum)
+
+    e.GET("/api/:ipsum/texts", h.GetIpsumTexts)
+    e.GET("/api/:ipsum/texts/:page", h.GetIpsumTexts)
     
     // Secure User Routes
     e.GET("/:ipsum/adm/:key", h.Admin, mCsrf, mAuth)
+    e.GET("/:ipsum/adm/:key/:page", h.Admin, mCsrf, mAuth)
     // API
     e.POST("/api/s/:ipsum/addtext", h.AddText, mCsrf, mAuth)
     e.POST("/api/s/:ipsum/updatetext", h.UpdateText, mCsrf, mAuth)

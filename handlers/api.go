@@ -18,6 +18,28 @@ type (
         Values []string `json:"values"`
     }
 )
+
+
+// GET = "/api/:ipsum/texts" 
+func  (h *Handler)GetIpsumTexts(c echo.Context) error {
+    
+    ipsum := c.Param("ipsum") 
+    ipsumMap, err := h.Dbm.GetIpsum( ipsum )
+    if ( err != nil ) {
+        return echo.NewHTTPError(http.StatusNotFound, err.Error())
+    }
+
+    var nbPage int64; nbPage = 1
+    if page := c.Param("page") ; page != "" {
+        nbPage, _ = strconv.ParseInt(page, 10, 32)
+    }
+
+    ipsumId, _ := strconv.ParseInt(ipsumMap["id"], 10, 32)
+    yiptexts, _ := h.Dbm.GetIpsumTextsForPage(ipsumId, nbPage, 20)
+
+    return c.JSON(http.StatusOK, yiptexts)
+}
+
 // POST "/api/s/:ipsum/deletetext"
 func (h *Handler)DeleteText(c echo.Context) error {
 
