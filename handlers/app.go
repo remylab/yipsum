@@ -14,7 +14,6 @@ import (
     "github.com/gorilla/sessions"
 )
 
-
 type (
     Handler struct {
         Dbm db.DbManager
@@ -24,8 +23,6 @@ type (
 var (
     h *Handler
 )
-
-
 
 func isAdmin(c echo.Context, store *sessions.CookieStore) bool {
 
@@ -41,9 +38,6 @@ func isAdmin(c echo.Context, store *sessions.CookieStore) bool {
 
     return isValid
 }
-
-
-// Route handlers
 
 // URI = "/:ipsum"
 func  (h *Handler)Ipsum(c echo.Context) error {
@@ -62,7 +56,7 @@ func  (h *Handler)Ipsum(c echo.Context) error {
 
 // URI = "/"
 func  (h *Handler)Index(c echo.Context) error {
-    return c.Render(http.StatusOK, "index",nil)
+    return c.Render(http.StatusOK, "index", nil)
 }
 
 // URI = "/:ipsum/adm" 
@@ -86,6 +80,7 @@ func  (h *Handler)Admin(c echo.Context) error {
     var pageSize int64 ; pageSize = 50
 
     ipsum := c.Param("ipsum") 
+    key := c.Param("key") 
     ipsumMap, err := h.Dbm.GetIpsum( ipsum )
     if ( err != nil ) {
         return echo.NewHTTPError(http.StatusNotFound, err.Error())
@@ -94,8 +89,11 @@ func  (h *Handler)Admin(c echo.Context) error {
     csrf, _ := c.Get("csrf").(string)
 
     var nbPage int64; nbPage = 1
-    if page := c.Param("page") ; page != "" {
+    var page string
+    if page = c.Param("page") ; page != "" {
         nbPage, _ = strconv.ParseInt(page, 10, 32)
+    } else {
+        page = "1"
     }
 
     ipsumId, _ := strconv.ParseInt(ipsumMap["id"], 10, 32)
@@ -110,14 +108,19 @@ func  (h *Handler)Admin(c echo.Context) error {
     for i := 1; i <= totalPages; i++ {
         pages[i] = strconv.Itoa(i)
     }
+    pagesModel := map[string]interface{}{
+        "pages":pages,
+        "uri":"/"+ipsum+"/adm/"+key+"/",
+        "current": page,
+    }
 
     model := map[string]interface{}{
         "csrf": csrf,
         "ipsumUri": ipsum,
+        "key": key,
         "ipsum": ipsumMap,
         "texts":yiptexts,
-        "pages": pages, 
-        "currentPage":nbPage
+        "pages": pagesModel,
     }
 
     return c.Render(http.StatusOK, "admin", model)

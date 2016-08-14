@@ -259,7 +259,7 @@ var Admin = (function() {
             '<div class="col-xs-10 col-yiptext">'+
                 '<div class="yiptext" style="display:none;">'+escape(text)+'</div>'+
                 '<div class="yiptext-edit">'+
-                    '<textarea wrap="soft" maxlength="1000">'+text+'</textarea>'+
+                    '<textarea wrap="soft" maxlength="600">'+text+'</textarea>'+
                 '</div>'+
                 '<div class="msg"></div>'+
             '</div>'+

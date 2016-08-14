@@ -1,6 +1,8 @@
 package common
 
 import (
+    //"fmt"
+    "math"
     "io"
     "os"
     "time"
@@ -27,11 +29,6 @@ func GetSessionKey() string {
     return os.Getenv("yip_session_key")
 }
 
-func GetCSRFSecret() string {
-    return os.Getenv("yip_csrf_secret")
-}
-
-
 func GetTimestamp() int32 {
     return int32(time.Now().Unix())
 }
@@ -45,7 +42,6 @@ func GetTemplate() *Template {
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
     return t.templates.ExecuteTemplate(w, name, data)
 }
-
 
 func GetUri(s string) string {
 
@@ -66,4 +62,57 @@ func RandomString(strlen int) string {
         result[i] = chars[rand.Intn(len(chars))]
     }
     return string(result)
+}
+
+func GetSentences(text string) []string {
+
+    ret := []string{}
+    sentenceSize := 256
+
+    del := "$>$"
+    text = strings.Replace(text, "...", del, -1)
+    text = strings.Replace(text, "..", del, -1)
+    text = strings.Replace(text, ".", del, -1)
+    text = strings.Replace(text, "!", del,  -1)
+    text = strings.Replace(text, "?", del, -1)
+
+    sentences := strings.Split(text, del)
+
+    for _, s := range sentences {
+        line := strings.TrimSpace(s)
+
+        length := len(line); if length > sentenceSize  {
+
+            d := float64(length) / float64(sentenceSize)
+            nbSplit := int(math.Ceil(d))
+
+            d = float64(length) / float64(nbSplit)
+            size := int(math.Ceil(d))
+
+            splitMap := map[int]string{}
+
+            words := strings.Split(line," ")
+            numSplit := 0
+            for _, s_word := range words {
+                splitMap[numSplit] += s_word + " "
+                if len(splitMap[numSplit]) > size {
+                    numSplit +=1
+                }
+            }
+
+            for _, x := range splitMap {
+                ret = append(ret, strings.ToLower(strings.TrimSpace(x))) 
+            }
+
+        } else {
+            ret = append(ret,strings.ToLower(line))
+        }
+    }
+
+    //fmt.Printf("%v\n","############")
+
+    for _, s := range ret {
+        fmt.Printf("%v\n",s)
+    }
+    return ret
 }

@@ -143,7 +143,7 @@ func (m *SqliteManager)GetIpsumTextsForPage(ipsumId int64, pageNum int64, resByP
 
     var id , data string
 
-    texts := make([]map[string]string, 0)
+    texts := []map[string]string{}
     nbTexts := 0
     for rows.Next() {
         err := rows.Scan(&id, &data)

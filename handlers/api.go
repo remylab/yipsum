@@ -1,6 +1,5 @@
 package handlers
 
-
 import (
     //"fmt"
     "net/http"
@@ -18,7 +17,6 @@ type (
         Values []string `json:"values"`
     }
 )
-
 
 // GET = "/api/:ipsum/texts" 
 func  (h *Handler)GetIpsumTexts(c echo.Context) error {
