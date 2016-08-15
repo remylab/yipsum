@@ -2,6 +2,8 @@ package db
 
 import (
     "fmt"
+    "math"
+    "math/rand"
     "os"
     "strings"
     "strconv"
@@ -73,7 +75,7 @@ func (m *SqliteManager) UpdateText(ipsumId int64, dataId int64, text string) (sq
     defer stmt.Close()
     if err != nil {return ret,err}
 
-    escText := template.HTMLEscapeString(text)
+    escText := template.HTMLEscapeString( strings.TrimSpace(text) )
     res, err := stmt.Exec(escText, ipsumId, dataId)
     if err != nil {return ret,err}
 
@@ -87,6 +89,12 @@ func (m *SqliteManager) AddText(ipsumId int64, text string) (sqlRes, error) {
 
     ret := sqlRes{false,""}
 
+    total, _ := m.GetTotalIpsumTexts(ipsumId) 
+    if (total >= 1000) {
+        ret.Msg = "too_many"
+        return ret, nil
+    }
+
     _, err :=  m.db.Exec("PRAGMA foreign_keys = ON;")
     if err != nil {return ret,err}
 
@@ -96,7 +104,7 @@ func (m *SqliteManager) AddText(ipsumId int64, text string) (sqlRes, error) {
 
     created := common.GetTimestamp()
 
-    escText := template.HTMLEscapeString(text)
+    escText := template.HTMLEscapeString( strings.TrimSpace(text) )
     res, err := stmt.Exec(ipsumId, escText, created)
     if err != nil {
         sqliteError := err.Error()
@@ -128,6 +136,57 @@ func (m *SqliteManager)GetTotalIpsumTexts(ipsumId int64) (int,error) {
     if err != nil {return 0, err}
 
     return count, nil
+}
+
+func (m *SqliteManager)GenerateIpsum(ipsumId int64) ([]string,error) {
+    ret := []string{}
+
+    stmt, err := m.db.Prepare("select id, data from ipsumtext where ipsum_id = ? limit 1000;")
+    if err != nil {return nil, err}
+    defer stmt.Close()
+
+    rows, err := stmt.Query(ipsumId)
+    if err != nil {return nil, err}
+    defer rows.Close()
+
+    totalLength := 0
+
+    var id , data string
+    for rows.Next() {
+        err := rows.Scan(&id, &data)
+        if err != nil {return ret, err}
+
+        totalLength += len(data)
+        sentences := common.GetSentences(data)
+        ret = append(ret, sentences...)
+    }
+
+    if err = rows.Err(); err != nil {
+        return ret, err
+    }
+
+    targetLength := 1200
+
+    if (totalLength <= targetLength) {
+        return ret, nil
+    }
+
+    d := float64(totalLength) / float64(targetLength)
+    chances := int(math.Floor(d))
+
+    final := []string{}; finalCount := 0
+    for _, s := range ret {
+        yes := rand.Intn(chances) == 0
+        if ( yes ) {
+            finalCount += len(s)
+            final = append(final, s)
+            if ( finalCount > targetLength ) {
+                break
+            }
+        }
+    }
+
+    return final, nil
 }
 
 func (m *SqliteManager)GetIpsumTextsForPage(ipsumId int64, pageNum int64, resByPage int64) ([]map[string]string, error) {

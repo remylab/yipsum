@@ -18,7 +18,23 @@ var api = {
         createIpsum:false,
         addQuote:false,
         editQuote:false,
-        deleteQuote:false
+        deleteQuote:false,
+        generateIpsum:false,
+    },
+    generateIpsum:function(callback) {
+        if (api.running.generateIpsum)  { return; }
+        api.running.generateIpsum = true
+
+        $.get( "/api/"+api.ispumUri+"/generate")
+        .done(function(data) {
+            callback(data);
+        })
+        .fail(function(data) {
+            callback([]);
+        })
+        .always(function() {
+            api.running.generateIpsum = false;
+        });
     },
     deleteQuote:function($e, callback) {
         if (api.running.deleteQuote)  { return; }

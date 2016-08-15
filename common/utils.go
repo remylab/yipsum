@@ -2,7 +2,7 @@ package common
 
 import (
     //"fmt"
-    "math"
+    //"math"
     "io"
     "os"
     "time"
@@ -67,7 +67,7 @@ func RandomString(strlen int) string {
 func GetSentences(text string) []string {
 
     ret := []string{}
-    sentenceSize := 256
+    sentenceSize := 100
 
     del := "$>$"
     text = strings.Replace(text, "...", del, -1)
@@ -83,36 +83,27 @@ func GetSentences(text string) []string {
 
         length := len(line); if length > sentenceSize  {
 
-            d := float64(length) / float64(sentenceSize)
-            nbSplit := int(math.Ceil(d))
-
-            d = float64(length) / float64(nbSplit)
-            size := int(math.Ceil(d))
-
-            splitMap := map[int]string{}
-
             words := strings.Split(line," ")
-            numSplit := 0
+            sentence := ""
             for _, s_word := range words {
-                splitMap[numSplit] += s_word + " "
-                if len(splitMap[numSplit]) > size {
-                    numSplit +=1
+                word := strings.TrimSpace(s_word)
+
+                if ( len(word) > 0 ) {
+                    sentence += strings.ToLower(word) + " "
+                    if len(sentence) > sentenceSize {
+                        ret = append(ret,strings.TrimSpace( strings.ToLower(sentence) ))
+                        sentence = ""
+                    }
                 }
             }
 
-            for _, x := range splitMap {
-                ret = append(ret, strings.ToLower(strings.TrimSpace(x))) 
-            }
+            
 
         } else {
-            ret = append(ret,strings.ToLower(line))
+            if ( len(line) > 0 ) {
+                ret = append(ret,strings.ToLower(line))
+            }
         }
-    }
-
-    //fmt.Printf("%v\n","############")
-
-    for _, s := range ret {
-        fmt.Printf("%v\n",s)
     }
     return ret
 }

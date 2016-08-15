@@ -9,6 +9,15 @@ import (
     "github.com/remylab/yipsum/test"
 )
 
+func TestGenerateIpsum(t *testing.T) {
+
+    dbm, _ := NewSqliteManager("./TestGenerateIpsum.db")
+    defer AfterDbTest(dbm,"./TestGenerateIpsum.db")()
+
+    test.LoadTestData("./TestGenerateIpsum.db","sqliteManager_test.TestGenerateIpsum.sql")
+
+    dbm.GenerateIpsum(562)
+}
 
 func TestUpdateText(t *testing.T) {
 

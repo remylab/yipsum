@@ -2,6 +2,20 @@
     text-align: center;
 }
 
+.container {
+    width:98%;
+}
+.col-centered{
+    float: none;
+    margin: 0 auto;
+}
+#ipsum-text {
+    padding: 8px;
+    margin-top:20px;
+    border-radius: 8px;
+    border: solid 2px #2B778C;
+}
+
 #createsuccess h3 {
 	padding : 20px;
 }
@@ -33,9 +47,6 @@
 }
 .row-yiptext textarea {
     margin:2px;
-    width:100%;
-    overflow:hidden;
-    resize:none;
     background-color: #FCFEFE;
 }
 
@@ -50,16 +61,8 @@
 
 .yiptext-add textarea {
     margin:2px;
-    width:100%;
-    overflow:hidden;
-    resize:none;
     padding: 2px !important;
 }
-
-.row-yiptext textarea, .yiptext-add textarea {
-    height:116px;
-}
-
 .col-add {
     padding-left: 0px !important;
 }
@@ -95,6 +98,58 @@
     border:none;
 }
 
+.btn-generate { 
+  color: #FFFFFF; 
+  background-color: #1E94B8; 
+  border-color: #2B778C; 
+} 
+ 
+.btn-generate:hover, 
+.btn-generate:focus, 
+.btn-generate:active, 
+.btn-generate.active, 
+.open .dropdown-toggle.btn-generate { 
+  color: #FFFFFF; 
+  background-color: #2B778C; 
+  border-color: #2B778C; 
+} 
+ 
+.btn-generate:active, 
+.btn-generate.active, 
+.open .dropdown-toggle.btn-generate { 
+  background-image: none; 
+} 
+ 
+.btn-generate.disabled, 
+.btn-generate[disabled], 
+fieldset[disabled] .btn-generate, 
+.btn-generate.disabled:hover, 
+.btn-generate[disabled]:hover, 
+fieldset[disabled] .btn-generate:hover, 
+.btn-generate.disabled:focus, 
+.btn-generate[disabled]:focus, 
+fieldset[disabled] .btn-generate:focus, 
+.btn-generate.disabled:active, 
+.btn-generate[disabled]:active, 
+fieldset[disabled] .btn-generate:active, 
+.btn-generate.disabled.active, 
+.btn-generate[disabled].active, 
+fieldset[disabled] .btn-generate.active { 
+  background-color: #1E94B8; 
+  border-color: #2B778C; 
+} 
+ 
+.btn-generate .badge { 
+  color: #1E94B8; 
+  background-color: #FFFFFF; 
+}
+
+textarea {
+    box-sizing: border-box;
+    resize: none;
+    width:100%;
+}
+
 @media (min-width: 768px) { 
     .container {
         max-width: 730px;
@@ -114,7 +169,6 @@
         padding: 2px 4px !important;
     }
     .row-yiptext textarea, .yiptext-add textarea {
-        height:80px;
     }
 }
 

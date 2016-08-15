@@ -81,6 +81,7 @@ func  (h *Handler)Admin(c echo.Context) error {
 
     ipsum := c.Param("ipsum") 
     key := c.Param("key") 
+
     ipsumMap, err := h.Dbm.GetIpsum( ipsum )
     if ( err != nil ) {
         return echo.NewHTTPError(http.StatusNotFound, err.Error())
@@ -96,13 +97,23 @@ func  (h *Handler)Admin(c echo.Context) error {
         page = "1"
     }
 
-    ipsumId, _ := strconv.ParseInt(ipsumMap["id"], 10, 32)
-    yiptexts, _ := h.Dbm.GetIpsumTextsForPage(ipsumId, nbPage, pageSize)
  
+    ipsumId, _ := strconv.ParseInt(ipsumMap["id"], 10, 32)
     total, _ := h.Dbm.GetTotalIpsumTexts(ipsumId)
+
 
     d := float64(total) / float64(pageSize)
     totalPages := int(math.Ceil(d))
+
+    if totalPages > 0  && nbPage > int64(totalPages) && nbPage > 1{
+        sRedir := "/"+ipsum+"/adm/"+key 
+        if ( totalPages > 1 ) {
+            sRedir += "/" + strconv.FormatInt( int64(totalPages), 10)
+        }
+        return c.Redirect(http.StatusFound, sRedir )
+    }
+
+    yiptexts, _ := h.Dbm.GetIpsumTextsForPage(ipsumId, nbPage, pageSize)
 
     pages := make(map[int]string) 
     for i := 1; i <= totalPages; i++ {

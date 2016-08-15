@@ -23,10 +23,10 @@
             <h1>{{index .ipsum "name"}} Admin</h1>
 
             <div class="row row-yiptext-add"> 
-                <label>Add a new quote :</label>
+                <label>Add a quote or a paragraph :</label>
                 <div class="col-xs-10 col-yiptext-add">
                     <div class="yiptext-add">
-                        <textarea wrap="soft" maxlength="600"></textarea>
+                        <textarea maxlength="600" data-autoresize rows="2"></textarea>
                     </div>
                 </div>
                 <div class="col-xs-2 col-btn-add">
@@ -34,19 +34,19 @@
                 </div>
             </div>
 
+            <div class="yiptext-list">
             {{ $length := len .texts }} {{ if gt $length 0 }}
 
                 {{template "pagination" .pages }}
 
-                <div class="yiptest-list">
                     {{range .texts}}
                         {{template "yiptext" . }}
                     {{end}}
-                </div>
 
                 {{template "pagination" .pages }}
 
             {{end}}
+            </div>
 
         </div>
 
@@ -87,7 +87,7 @@
         <div class="col-xs-10 col-yiptext">
             <div class="yiptext" style="display:none;">{{index . "text"}}</div>
             <div class="yiptext-edit">
-                <textarea wrap="soft" maxlength="600">{{index . "text"}}</textarea>
+                <textarea maxlength="600" data-autoresize rows="2">{{index . "text"}}</textarea>
             </div>
             <div class="msg"></div>
         </div>

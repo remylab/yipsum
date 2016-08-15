@@ -2,8 +2,15 @@
     text-align: center;
 }
 
+.container {
+    width:98%;
+}
+.col-centered{
+    float: none;
+    margin: 0 auto;
+}
 #ipsum-text {
-    padding:8px;
+    padding: 8px;
     margin-top:20px;
     border-radius: 8px;
     border: solid 2px #2B778C;
@@ -39,11 +46,7 @@
     overflow: hidden;
 }
 .row-yiptext textarea {
-    height:64px;
     margin:2px;
-    width:100%;
-    overflow:hidden;
-    resize:none;
     background-color: #FCFEFE;
 }
 
@@ -57,11 +60,7 @@
 }
 
 .yiptext-add textarea {
-    height:64px;
     margin:2px;
-    width:100%;
-    overflow:hidden;
-    resize:none;
     padding: 2px !important;
 }
 .col-add {
@@ -145,6 +144,12 @@ fieldset[disabled] .btn-generate.active {
   background-color: #FFFFFF; 
 }
 
+textarea {
+    box-sizing: border-box;
+    resize: none;
+    width:100%;
+}
+
 @media (min-width: 768px) { 
     .container {
         max-width: 730px;
@@ -164,7 +169,6 @@ fieldset[disabled] .btn-generate.active {
         padding: 2px 4px !important;
     }
     .row-yiptext textarea, .yiptext-add textarea {
-        height:48px;
     }
 }
 

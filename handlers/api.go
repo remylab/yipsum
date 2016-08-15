@@ -18,6 +18,22 @@ type (
     }
 )
 
+// GET = "/api/:ipsum/generate" 
+func  (h *Handler)GenerateIpsum(c echo.Context) error {
+    
+    ipsum := c.Param("ipsum") 
+    ipsumMap, err := h.Dbm.GetIpsum( ipsum )
+    if ( err != nil ) {
+        return echo.NewHTTPError(http.StatusNotFound, err.Error())
+    }
+    s_ipsumId := ipsumMap["id"]
+    ipsumId, _ := strconv.ParseInt(s_ipsumId, 10, 32)
+
+    ret, err := h.Dbm.GenerateIpsum(ipsumId)
+
+    return c.JSON(http.StatusOK, ret)
+}
+
 // GET = "/api/:ipsum/texts" 
 func  (h *Handler)GetIpsumTexts(c echo.Context) error {
     

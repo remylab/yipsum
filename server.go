@@ -62,6 +62,7 @@ func main() {
 
     e.GET("/api/:ipsum/texts", h.GetIpsumTexts)
     e.GET("/api/:ipsum/texts/:page", h.GetIpsumTexts)
+    e.GET("/api/:ipsum/generate", h.GenerateIpsum)
     
     // Secure User Routes
     e.GET("/:ipsum/adm/:key", h.Admin, mCsrf, mAuth)

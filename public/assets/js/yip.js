@@ -2,6 +2,16 @@ String.prototype.isEmpty = function() {
     return (this.length === 0 || !this.trim());
 };
 
+// src : http://stephanwagner.me/auto-resizing-textarea
+jQuery.each(jQuery('textarea[data-autoresize]'), function() {
+    var offset = this.offsetHeight - this.clientHeight;
+    var resizeTextarea = function(el) {
+        jQuery(el).css('height', 'auto').css('height', el.scrollHeight + offset);
+    };
+    resizeTextarea(this);
+    jQuery(this).on('keyup input', function() { resizeTextarea(this); }).removeAttr('data-autoresize');
+});
+
 var util = {
     displayHelp:function(el, action = "reset", msg = ""){
 
@@ -259,7 +269,7 @@ var Admin = (function() {
             '<div class="col-xs-10 col-yiptext">'+
                 '<div class="yiptext" style="display:none;">'+escape(text)+'</div>'+
                 '<div class="yiptext-edit">'+
-                    '<textarea wrap="soft" maxlength="600">'+text+'</textarea>'+
+                    '<textarea maxlength="600" data-autoresize rows="2">'+text+'</textarea>'+
                 '</div>'+
                 '<div class="msg"></div>'+
             '</div>'+
@@ -272,7 +282,7 @@ var Admin = (function() {
 
         if (api.running.addQuote)  { return; }
 
-        $('.yiptest-list').prepend($e);
+        $('.yiptext-list').prepend($e);
 
         // register events
         $('.btn-edit', $e).click(onClickEdit);
@@ -286,9 +296,13 @@ var Admin = (function() {
             $e.attr("data-id",res.msg);
             return ; 
         } else {
+            var errorMsg = "Sorry, server error. Please try again later...";
+            if ( res.msg == "too_many") {
+                errorMsg = "Sorry, you've reached the 1000 quotes limit, please remove or edit existing quotes";
+            }
             $('.col-edit', $e).hide();
-            $('.msg', $e).hide().after('Sorry, server error. Please try again later...');
-            $e.delay(2000).fadeOut();
+            $('.msg', $e).hide().after(errorMsg);
+            $e.delay(4000).fadeOut();
         }
     };
 
@@ -336,5 +350,100 @@ var Admin = (function() {
     };
 }());
 
+var numBetween = function(min,max) {
+    return Math.floor(Math.random()*(max-min+1)+min);
+}
+var Ipsum = (function() {
+    "use strict";
+    var 
+    init,
+    storage=$("div")[0],
+    bindUIActions,
+    onClickGenerate,
+    onGenerateResult,
+    printIpsum,
+    nbPrint=0
+    ;
+
+    init = function(){
+        bindUIActions();
+        api.generateIpsum(onGenerateResult(true));
+    };
+
+    bindUIActions = function() {
+        $('.btn-generate').click(onClickGenerate);
+    };
+
+    onGenerateResult = function(withPrint) {
+        return function(res) {
+            jQuery.data(storage, "data", res );
+            if (withPrint) {
+                printIpsum(res)
+            }
+        };
+    }
+
+    onClickGenerate = function() {
+        // only fetch data from server after 5 prints
+        if ( nbPrint > 5) {
+            nbPrint = 0;
+            $('#ipsum-text').html("loading...");
+            api.generateIpsum(onGenerateResult(true));
+        } else {
+            printIpsum(jQuery.data(storage, "data"));
+        }
+    }
+
+    printIpsum = function(res) {
+        nbPrint += 1;
+        var nbPar = numBetween(2,5);
+
+        var sizePar = 0;
+
+        var lastIndex = res.length-1;
+
+        if ( lastIndex < 0 ) {
+            $('#ipsum-text').html("Hum... looks like this Yipsum is under construction, nothing to show yet...");
+        } else {
+
+            var ends =[".",".",".","...","?","!"];
+            var par = "", ipsum = "";
+            for (var i = 1; i <= nbPar; i++) { 
+                sizePar = numBetween(100,600);
+
+                var line = "";
+                while ( par.length <= sizePar) {
+                    var randIndex = numBetween(0,lastIndex)
+                    var s = res[randIndex];
+
+                    if ( typeof s != 'undefined' && s.length > 0 ) {
+
+                        if ( s.length < 20) {
+                            line +=  s + " ";
+                        } else {
+                            line = s;
+                        }
+                        if ( line.length > 20 ) {
+                            line = line.charAt(0).toUpperCase() + line.slice(1);
+                            line = line.trim()
+                            var endChar = ends[ Math.floor(Math.random()*(ends.length)) ]
+                            par +=  line + endChar + " ";   
+                            line = ""
+                        }  
+                    }
+                }
+                ipsum += "<p>"+par.trim()+"</p>"
+                par = ""
+            }  
+            $('#ipsum-text').html(ipsum);
+        }
+    }
+
+    return {
+        init: init
+    };
+}());
+
 CreateIpsum.init();
-Admin.init()
+Admin.init();
+Ipsum.init();
