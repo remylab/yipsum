@@ -20,11 +20,9 @@ import (
 func main() {
 
     fmt.Printf("%v\n","starting...")
-    common.SendMail("sender@test.com","recipient@test.com", "message from Yispum","application started")
 
     e := echo.New()
     e.Static("/static", "public/assets")
-    e.File("/favicon.ico", "public/assets/images/favicon.ico")
     e.Pre(middleware.RemoveTrailingSlash())
 
     // setup templates
