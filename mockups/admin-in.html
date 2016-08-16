@@ -19,23 +19,46 @@
     </head>
     <body>
         <div class="container index">
-            <h1>Admin zone</h1>
+            <div class="row row-settings" >
+                <div class="col-xs-4 col-xs-offset-6">
+                    <h2>Admin zone</h2>
+                </div>
+                <div class="col-xs-2 col-settings">
+                    <button type="button" class="btn btn-settings"><span class="glyphicon glyphicon-cog"></span></button>
+                </div>
+            </div>
+            <div class="row row-settings-box" style="display:none;">
+            <hr style="text-align:right; width:100%; height:2px; background-color:#BFD6DC; margin: 0 4px 24px auto;">
+            <ul>
+                <li>
+                    Reset the Admin key : A reset-link* will be sent to the Admin of this Yipsum (please be aware that the current key will be invalidated for all users). <button type="button" class="btn btn-sm btn-resetkey">Reset</button>
+                </li>
+                <li>
+                    <label style="color:#d43f3a;"> Permanently delete this Yipsum</label> <input type="checkbox" class="check-deleteyip"> :
+                    A delete-link* will be sent to the Admin of this Yipsum. 
+                    <button type="button" class="btn btn-sm btn-deleteyip">Delete</button>
+                </li>
+            </ul>
+            <b>* Please note that the links will be valid for only 1 hour</b>
+            </div>
+            
+            <hr style="text-align:right; width:100%; height:2px; background-color:#BFD6DC; margin: 0 4px 24px auto;">
 
             <div class="row row-yiptext-add"> 
-                <label>Add a quote or a paragraph (max 1000 char)</label>
-                <div class="col-xs-10 col-yiptext-add">
+                <label>Add a quote or a paragraph (max 600 char)</label>
+                <div class="col-md-11 col-xs-10 col-yiptext-add">
                     <div class="yiptext-add">
-                        <textarea wrap="soft" maxlength="600"></textarea>
+                        <textarea maxlength="600" data-autoresize rows="4"></textarea>
                     </div>
                 </div>
-                <div class="col-xs-2 col-btn-add">
+                <div class="col-md-1 col-xs-2 col-btn-add">
                     <button type="button" class="btn btn-primary btn-md btn-add">Add</button>
                 </div>
             </div>
 
             <div class="row" style="text-align:center;">
                 <ul class="pagination">
-                    <li><a href="#" data-nb="1">1</a></li>
+                    <li ><a class="p-current" href="#" data-nb="1">1</a></li>
                     <li><a href="#" data-nb="2">2</a></li>
                 </ul>
             </div>

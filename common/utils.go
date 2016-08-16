@@ -1,7 +1,7 @@
 package common
 
 import (
-    //"fmt"
+    "fmt"
     //"math"
     "io"
     "os"
@@ -10,6 +10,10 @@ import (
     "regexp"
     "math/rand"
     "text/template"
+    "net/smtp"
+    "net/mail"
+    "encoding/base64"
+    "log"
 
     "github.com/labstack/echo"
 )
@@ -20,6 +24,60 @@ type (
         templates *template.Template
     }
 )
+
+func SendMail(sender string, recipient string, subject string, msg string)  {
+    // Connect to the remote SMTP server.
+    c, err := smtp.Dial( os.Getenv("yip_smtp") )
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Set the sender and recipient first
+    if err := c.Mail(sender); err != nil {
+        log.Fatal(err)
+    }
+    if err := c.Rcpt(recipient); err != nil {
+        log.Fatal(err)
+    }
+
+    // Send the email body.
+    wc, err := c.Data()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    from := mail.Address{"sender", sender}
+    to := mail.Address{"recipient", recipient}
+
+    header := make(map[string]string)
+    header["From"] = from.String()
+    header["To"] = to.String()
+    header["Subject"] = subject
+    header["MIME-Version"] = "1.0"
+    header["Content-Type"] = "text/plain; charset=\"utf-8\""
+    header["Content-Transfer-Encoding"] = "base64"
+
+    message := ""
+    for k, v := range header {
+        message += fmt.Sprintf("%s: %s\r\n", k, v)
+    }
+    message += "\r\n" + base64.StdEncoding.EncodeToString([]byte(msg))
+
+    _, err = fmt.Fprintf(wc, message)
+    if err != nil {
+        log.Fatal(err)
+    }
+    err = wc.Close()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Send the QUIT command and close the connection.
+    err = c.Quit()
+    if err != nil {
+        log.Fatal(err)
+    }
+}
 
 func GetRootPath() string {
     return os.Getenv("yip_root")

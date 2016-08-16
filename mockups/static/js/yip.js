@@ -213,7 +213,8 @@ var Admin = (function() {
     onClickAdd,
     onAddResult,
     onClickDelete,
-    onDeleteResult
+    onDeleteResult,
+    onClickSettings
     ;
 
     init = function(){
@@ -221,6 +222,8 @@ var Admin = (function() {
     };
 
     bindUIActions = function() {
+
+        $('.btn-settings').click(onClickSettings);
 
         $('.btn-delete').click(onClickDelete);
 
@@ -238,6 +241,14 @@ var Admin = (function() {
         });
     };
 
+    onClickSettings = function() {
+        if ( $(this).hasClass('open') ) {
+            $('.row-settings-box').hide();
+        } else {
+            $('.row-settings-box').show();
+        }
+        $(this).toggleClass('open');
+    };
 
     onClickDelete = function() {
         var $e = $(this).closest('.row-yiptext') 
@@ -306,11 +317,11 @@ var Admin = (function() {
         }
     };
 
-    onClickEdit = function($e) {
+    onClickEdit = function() {
         if (api.running.editQuote)  { return; }
 
         var $e = $(this).closest('.row-yiptext') 
-        $('.msg',$e).html("");
+        $('.msg', $e).html("");
 
         var t1 = $('.yiptext',$e).html().trim(), t2 = $('.yiptext-edit textarea',$e).val().trim();
 
@@ -384,7 +395,7 @@ var Ipsum = (function() {
     }
 
     onClickGenerate = function() {
-        // only fetch data from server after 5 prints
+        // only re-fetch data from server after 5 prints
         if ( nbPrint > 5) {
             nbPrint = 0;
             $('#ipsum-text').html("loading...");
@@ -418,11 +429,8 @@ var Ipsum = (function() {
 
                     if ( typeof s != 'undefined' && s.length > 0 ) {
 
-                        if ( s.length < 20) {
-                            line +=  s + " ";
-                        } else {
-                            line = s;
-                        }
+                        s.length < 20 ? line +=  s + " " : line = s;
+
                         if ( line.length > 20 ) {
                             line = line.charAt(0).toUpperCase() + line.slice(1);
                             line = line.trim()

@@ -20,6 +20,7 @@ import (
 func main() {
 
     fmt.Printf("%v\n","starting...")
+    common.SendMail("sender@test.com","recipient@test.com", "message from Yispum","application started")
 
     e := echo.New()
     e.Static("/static", "public/assets")

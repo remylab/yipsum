@@ -70,7 +70,7 @@
             {{ range $key, $value := .pages }}
                 {{ if eq $.current $value }}
                     {{ $link := "" }} 
-                    <li><a class="p-{{$value}}" href="javascript: void(0)">{{$value}}</a></li>              
+                    <li><a class="p-{{$value}} p-current" href="javascript: void(0)">{{$value}}</a></li>              
                 {{ end }}
                 {{ if ne $.current $value }}
                     {{ $link := "" }} 
