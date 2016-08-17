@@ -18,6 +18,32 @@ type (
     }
 )
 
+
+// POST = "/api/:ipsum/resetkey" 
+func  (h *Handler)ResetKey(c echo.Context) error {
+
+    ipsum := c.Param("ipsum") 
+    ipsumMap, err := h.Dbm.GetIpsum( ipsum )
+    if ( err != nil ) {
+        return echo.NewHTTPError(http.StatusNotFound, err.Error())
+    }
+    s_ipsumId := ipsumMap["id"]
+    ipsumId, _ := strconv.ParseInt(s_ipsumId, 10, 32)
+
+    ret, err := h.Dbm.UpdateResetKey(ipsumId)
+    if ( err != nil ) { return err }
+
+    if (ret.Ok) {
+        msg := "Hi,\r\n\r\nDid you request a key reset for "+ ipsumMap["name"] +" Yipsum?\r\n\r\n"
+        msg += "If yes, please click here to proceed : http://" + common.GetDomain() + "/" + ipsum + "/resetkey/" + ret.Msg
+
+        common.SendMail("no-reply@yipsum.com", ipsumMap["adminEmail"], "Yipsum : Reset Key", msg)
+        ret.Msg = ""
+    }
+
+    return c.JSON(http.StatusOK, ret)
+}
+
 // GET = "/api/:ipsum/generate" 
 func  (h *Handler)GenerateIpsum(c echo.Context) error {
     
@@ -30,6 +56,7 @@ func  (h *Handler)GenerateIpsum(c echo.Context) error {
     ipsumId, _ := strconv.ParseInt(s_ipsumId, 10, 32)
 
     ret, err := h.Dbm.GenerateIpsum(ipsumId)
+    if ( err != nil ) { return err }
 
     return c.JSON(http.StatusOK, ret)
 }
@@ -49,7 +76,8 @@ func  (h *Handler)GetIpsumTexts(c echo.Context) error {
     }
 
     ipsumId, _ := strconv.ParseInt(ipsumMap["id"], 10, 32)
-    yiptexts, _ := h.Dbm.GetIpsumTextsForPage(ipsumId, nbPage, 20)
+    yiptexts, err := h.Dbm.GetIpsumTextsForPage(ipsumId, nbPage, 20)
+    if ( err != nil ) { return err }
 
     return c.JSON(http.StatusOK, yiptexts)
 }
@@ -91,8 +119,8 @@ func (h *Handler)UpdateText(c echo.Context) error {
 
     ipsumId, _ := strconv.ParseInt(s_ipsumId, 10, 32)
     textId, _ := strconv.ParseInt(s_textId, 10, 32)
-    editRes, editErr := h.Dbm.UpdateText(ipsumId, textId, text)
-    if editErr != nil { return editErr; }
+    editRes, upErr := h.Dbm.UpdateText(ipsumId, textId, text)
+    if upErr != nil { return upErr; }
 
     return c.JSON(http.StatusOK, check{editRes.Ok, editRes.Msg, nil} )
 }

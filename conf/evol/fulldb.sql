@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS ipsums(
     adminKey TEXT NOT NULL,
     resetEmailToken TEXT,
     resetKeyToken TEXT,
+    deleteForeverToken TEXT,
     created INTEGER
 );
 

@@ -9,6 +9,18 @@ import (
     "github.com/remylab/yipsum/test"
 )
 
+
+func TestUpdateResetKey(t *testing.T) {
+
+    dbm, _ := NewSqliteManager("./TestUpdateResetKey.db")
+    defer AfterDbTest(dbm,"./TestUpdateResetKey.db")()
+
+    test.LoadTestData("./TestUpdateResetKey.db","./sqliteManager_test.TestUpdateResetKey.sql")
+
+    _, err := dbm.UpdateResetKey(562)
+    assert.Nil(t,err)
+}
+
 func TestGenerateIpsum(t *testing.T) {
 
     dbm, _ := NewSqliteManager("./TestGenerateIpsum.db")

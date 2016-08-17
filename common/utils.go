@@ -79,6 +79,9 @@ func SendMail(sender string, recipient string, subject string, msg string)  {
     }
 }
 
+func GetDomain() string {
+    return os.Getenv("yip_domain")
+}
 func GetRootPath() string {
     return os.Getenv("yip_root")
 }

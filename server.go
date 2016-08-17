@@ -66,10 +66,12 @@ func main() {
     // Secure User Routes
     e.GET("/:ipsum/adm/:key", h.Admin, mCsrf, mAuth)
     e.GET("/:ipsum/adm/:key/:page", h.Admin, mCsrf, mAuth)
+
     // API
     e.POST("/api/s/:ipsum/addtext", h.AddText, mCsrf, mAuth)
     e.POST("/api/s/:ipsum/updatetext", h.UpdateText, mCsrf, mAuth)
     e.POST("/api/s/:ipsum/deletetext", h.DeleteText, mCsrf, mAuth)
+    e.GET("/api/s/:ipsum/resetkey", h.ResetKey, mCsrf, mAuth)
 
     /*// (LINUX ONLY) don't drop connections with stop restart
     std := standard.New(":1424")

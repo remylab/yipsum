@@ -11,6 +11,7 @@ import (
     "html/template"
     _ "github.com/mattn/go-sqlite3"
     "github.com/remylab/yipsum/common"
+    "github.com/labstack/gommon/random"
 )
 
 type (
@@ -50,13 +51,30 @@ func (m *SqliteManager) Close() error {
     return m.db.Close()
 }
 
+
+func (m *SqliteManager) UpdateResetKey(ipsumId int64) (sqlRes, error) {
+    ret := sqlRes{false,""}
+
+    stmt, err := m.db.Prepare("UPDATE ipsums set resetKeyToken=? where id=?")
+    if err != nil {return ret,err}
+    defer stmt.Close()
+
+    token := random.String(32)
+    res, err := stmt.Exec(token, ipsumId)
+    if err != nil {return ret,err}
+
+    rowCnt, err := res.RowsAffected()
+    if err != nil {return ret,err}
+
+    return sqlRes{(rowCnt==1), token}, err
+}
 func (m *SqliteManager) DeleteText(ipsumId int64, dataId int64) (sqlRes, error) {
 
     ret := sqlRes{false,""}
 
     stmt, err := m.db.Prepare("DELETE from ipsumtext where ipsum_id=? and id= ?")
-    defer stmt.Close()
     if err != nil {return ret,err}
+    defer stmt.Close()
 
     res, err := stmt.Exec(ipsumId, dataId)
     if err != nil {return ret,err}
@@ -72,8 +90,8 @@ func (m *SqliteManager) UpdateText(ipsumId int64, dataId int64, text string) (sq
     ret := sqlRes{false,""}
 
     stmt, err := m.db.Prepare("UPDATE ipsumtext set data=? where ipsum_id=? and id= ?")
-    defer stmt.Close()
     if err != nil {return ret,err}
+    defer stmt.Close()
 
     escText := template.HTMLEscapeString( strings.TrimSpace(text) )
     res, err := stmt.Exec(escText, ipsumId, dataId)
@@ -99,8 +117,8 @@ func (m *SqliteManager) AddText(ipsumId int64, text string) (sqlRes, error) {
     if err != nil {return ret,err}
 
     stmt, err := m.db.Prepare("INSERT INTO ipsumtext(ipsum_id,data,created) VALUES(?,?,?)")
-    defer stmt.Close()
     if err != nil {return ret,err}
+    defer stmt.Close()
 
     created := common.GetTimestamp()
 
@@ -228,19 +246,21 @@ func (m *SqliteManager) GetIpsum(s string) (map[string]string, error) {
         "id": "",
         "name": "",
         "desc": "",
+        "adminEmail":"",
     }
 
-    stmt, err := m.db.Prepare("select id, name, desc from ipsums where uri = ?")
+    stmt, err := m.db.Prepare("select id, name, desc, adminEmail from ipsums where uri = ?")
     if err != nil {return ipsumMap, err}
     defer stmt.Close()
 
-    var s1, s2, s3 sql.NullString
-    err = stmt.QueryRow(s).Scan(&s1,&s2,&s3)
+    var s1, s2, s3, s4 sql.NullString
+    err = stmt.QueryRow(s).Scan(&s1,&s2,&s3,&s4)
     if err != nil {return ipsumMap, err}
     
     if ( s1.Valid ) { ipsumMap["id"] = s1.String };
     if ( s2.Valid ) { ipsumMap["name"] = s2.String }; 
     if ( s3.Valid ) { ipsumMap["desc"] = s3.String }; 
+    if ( s4.Valid ) { ipsumMap["adminEmail"] = s4.String }; 
 
     return ipsumMap, nil
 }

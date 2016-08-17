@@ -366,8 +366,10 @@ var Ipsum = (function() {
     ;
 
     init = function(){
-        bindUIActions();
-        api.generateIpsum(onGenerateResult(true));
+        if ( $('.btn-generate').length > 0 ) {
+            bindUIActions();
+            api.generateIpsum(onGenerateResult(true));   
+        }
     };
 
     bindUIActions = function() {

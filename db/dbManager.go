@@ -18,4 +18,5 @@ type DbManager interface {
     AddText(ipsumId int64, text string) (sqlRes, error)
     UpdateText(ipsumId int64, dataId int64, text string) (sqlRes, error)
     DeleteText(ipsumId int64, dataId int64) (sqlRes, error)
+    UpdateResetKey(ipsumId int64) (sqlRes, error)
 }
