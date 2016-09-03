@@ -213,8 +213,7 @@ var Admin = (function() {
     onClickAdd,
     onAddResult,
     onClickDelete,
-    onDeleteResult,
-    onClickSettings
+    onDeleteResult
     ;
 
     init = function(){
@@ -222,8 +221,6 @@ var Admin = (function() {
     };
 
     bindUIActions = function() {
-
-        $('.btn-settings').click(onClickSettings);
 
         $('.btn-delete').click(onClickDelete);
 
@@ -239,15 +236,6 @@ var Admin = (function() {
                 onClickAdd($(this))     
             }
         });
-    };
-
-    onClickSettings = function() {
-        if ( $(this).hasClass('open') ) {
-            $('.row-settings-box').hide();
-        } else {
-            $('.row-settings-box').show();
-        }
-        $(this).toggleClass('open');
     };
 
     onClickDelete = function() {
@@ -361,6 +349,98 @@ var Admin = (function() {
     };
 }());
 
+var Settings = (function() {
+    "use strict";
+    var 
+    init,
+    bindUIActions,
+    onClickSettings,
+    onClickSettingsAction,
+    onSettingResult
+    ;
+
+    init = function(){
+        bindUIActions();
+    };
+
+    bindUIActions = function() {
+
+        $('.btn-settings').click(onClickSettings);
+        $('.btn-resetkey').click( onClickSettingsAction("reset") );
+        $('.btn-deleteyip').click( onClickSettingsAction("delete") );
+
+    };
+
+
+    onClickSettings = function() {
+        if ( $(this).hasClass('open') ) {
+            $('#settings-box').hide();
+        } else {
+            $("#settings-options").show();
+            $('#settings-box').show();
+        }
+        $(this).toggleClass('open');
+    };
+
+    onClickSettingsAction = function(type) {
+        return function() {
+            $('#settingsError').hide().html("");
+
+            var response = grecaptcha.getResponse();
+
+            if(response.length == 0) {
+                $('#settingsError').html("Please answer the captcha and try again").fadeIn();
+            } else {
+                api.settingsAction(type, response, onSettingResult(type));
+            }
+        }
+
+    };
+
+    onSettingResult = function(type) {
+
+        var successMsg = "";
+        if ( type == "reset") {
+            successMsg = "Thanks, a reset email has been sent to the admin of this Yipsum."
+        } else if ( type == "delete") {
+            successMsg = "Thanks, a delete email has been sent to the admin of this Yipsum."
+        }
+
+        return function(res){
+
+            grecaptcha.reset();
+
+            if (res.ok) {
+                $('#settingsInfo').html(successMsg).fadeIn();
+                $('#settings-options').hide();
+
+                setTimeout(function() {
+                    $('#settingsError').hide().html("");
+                    $('#settingsInfo').hide().html("");
+                    $('.btn-settings').click();
+                }, 7000);
+
+            } else {
+
+                var errorMsg = "Server error, please try again later.";
+                if ( res.msg == "wrong_captcha") {
+                    errorMsg = "Invalid captcha, please try again";
+                }
+                $('#settingsError').html(errorMsg).fadeIn();
+
+                setTimeout(function() {
+                    $('#settingsError').hide().html("");
+                    $('#settingsInfo').hide().html("");
+                }, 7000);
+            }
+        }
+    };
+
+    return {
+        init: init
+    };
+}());
+
 var numBetween = function(min,max) {
     return Math.floor(Math.random()*(max-min+1)+min);
 }
@@ -454,4 +534,5 @@ var Ipsum = (function() {
 
 CreateIpsum.init();
 Admin.init();
+Settings.init();
 Ipsum.init();

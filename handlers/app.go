@@ -56,6 +56,7 @@ func  (h *Handler)Ipsum(c echo.Context) error {
 
 // URI = "/"
 func  (h *Handler)Index(c echo.Context) error {
+    fmt.Printf("captcha :%v\n", c.Get("g-recaptcha-is-valid").(bool) )
     return c.Render(http.StatusOK, "index", nil)
 }
 

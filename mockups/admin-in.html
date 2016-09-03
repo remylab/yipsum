@@ -17,7 +17,6 @@
             <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
 
-
         <link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
         <link rel="icon" type="image/png" href="/static/images/favicon-32x32.png" sizes="32x32">
         <link rel="icon" type="image/png" href="/static/images/favicon-16x16.png" sizes="16x16">
@@ -25,9 +24,11 @@
         <link rel="mask-icon" href="/static/images/safari-pinned-tab.svg" color="#5bbad5">
         <meta name="theme-color" content="#ffffff">
 
+        <script src='https://www.google.com/recaptcha/api.js'></script>
     </head>
     <body>
         <div class="container index">
+
             <div class="row row-settings" >
                 <div class="col-xs-4 col-xs-offset-6">
                     <h2>Admin zone</h2>
@@ -36,22 +37,37 @@
                     <button type="button" class="btn btn-settings"><span class="glyphicon glyphicon-cog"></span></button>
                 </div>
             </div>
-            <div class="row row-settings-box" style="display:none;">
-            <hr style="text-align:right; width:100%; height:2px; background-color:#BFD6DC; margin: 0 4px 24px auto;">
-            <ul>
-                <li>
-                    Reset the Admin key : A reset-link* will be sent to the Admin of this Yipsum (please be aware that the current key will be invalidated for all users). <button type="button" class="btn btn-sm btn-resetkey">Reset</button>
-                </li>
-                <li>
-                    <label style="color:#d43f3a;"> Permanently delete this Yipsum</label> <input type="checkbox" class="check-deleteyip"> :
-                    A delete-link* will be sent to the Admin of this Yipsum. 
-                    <button type="button" class="btn btn-sm btn-deleteyip">Delete</button>
-                </li>
-            </ul>
-            <b>* Please note that the links will be valid for only 1 hour</b>
+
+            <div id="settings-box" style="display:none;">
+
+                <div id="settings-options">
+                    <div class="row row-settings-box" >
+                        <hr style="text-align:right; width:100%; height:2px; background-color:#BFD6DC; margin: 0 4px 24px auto;">
+                        <ul>
+                            <li>
+                                <label style="color:#d43f3a;"> Reset the Admin key</label>: A reset-link* will be sent to the Admin of this Yipsum (please be aware that the current key will be invalidated for all users). <button type="button" class="btn btn-sm btn-resetkey">Reset</button>
+                            </li>
+                            <li>
+                                <label style="color:#d43f3a;"> Permanently delete this Yipsum</label>:
+                                A delete-link* will be sent to the Admin of this Yipsum. 
+                                <button type="button" class="btn btn-sm btn-deleteyip">Delete</button>
+                            </li>
+                            (* Please note that the links will be valid for 1 hour)
+                        </ul>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-9 col-md-offset-3 col-xs-12">
+                            <div class="g-recaptcha" data-sitekey="6LfmHikTAAAAAGvhTD8iMSCc_vXHvjRsrE15tbPr"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="settingsInfo" class="alert alert-info" style="display:none; margin-top:8px;"></div>
+                <div id="settingsError" class="alert alert-warning" style="display:none; margin-top:8px;"></div>
             </div>
-            
-            <hr style="text-align:right; width:100%; height:2px; background-color:#BFD6DC; margin: 0 4px 24px auto;">
+
+            <hr style="text-align:right; width:100%; height:2px; background-color:#BFD6DC; margin: 4px 4px 24px auto;">
 
             <div class="row row-yiptext-add"> 
                 <label>Add a quote or a paragraph (max 600 char)</label>
@@ -65,7 +81,7 @@
                 </div>
             </div>
 
-            <div class="row" style="text-align:center;">
+            <div class="row" style="text-align:center;width:95%;">
                 <ul class="pagination">
                     <li ><a class="p-current" href="#" data-nb="1">1</a></li>
                     <li><a href="#" data-nb="2">2</a></li>
@@ -92,7 +108,7 @@ As Monica crouched on the court, her face buried in her hands, crying with joy, 
             </div>
         </div>
 
-        <div class="row" style="text-align:center;">
+        <div class="row" style="text-align:center; width:95%;">
             <ul class="pagination">
                 <li><a href="#" data-nb="1">1</a></li>
                 <li><a href="#" data-nb="2">2</a></li>

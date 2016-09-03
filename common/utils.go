@@ -85,9 +85,11 @@ func GetDomain() string {
 func GetRootPath() string {
     return os.Getenv("yip_root")
 }
-
 func GetSessionKey() string {
     return os.Getenv("yip_session_key")
+}
+func GetRecaptchaKey() string {
+    return os.Getenv("yip_grecaptcha_key")
 }
 
 func GetTimestamp() int32 {

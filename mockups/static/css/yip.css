@@ -25,9 +25,10 @@
     margin-bottom : 4px;
 }
 .row-settings-box {
-    padding : 4px;
-    margin: 0 4px 8px 4px;
+    padding : 4px 4px 0 4px;
+    margin: 0 4px 0     px 4px;
 }
+
 .btn-settings {
     margin-top:22px;
 }

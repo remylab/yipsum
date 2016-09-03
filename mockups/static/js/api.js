@@ -7,6 +7,31 @@ var api = {
         editQuote:false,
         deleteQuote:false,
         generateIpsum:false,
+        settingsAction:false
+    },
+    settingsAction:function(type, captchaResp, callback) {
+        if (api.running.settingsAction)  { return; }
+        console.log("mockserver : /api/s/:ipsum/resetkey");
+
+        // ajax call will populate the res variable
+        var a = [
+            {ok:true,msg: ""}, // all good
+            {ok:false,msg:"wrong_captcha"}, // wrong captcha !
+            {ok:false,msg:"internal_error"} // Server error
+        ];        
+
+        var res = a[ Math.floor(Math.random()*(a.length)) ]
+
+        api.running.settingsAction = true;
+
+        res = {ok:true,msg: ""};
+        
+        setTimeout(function(){
+            console.log('res : ' + res.ok + ", " + res.msg);
+            api.running.settingsAction = false;
+            callback(res);
+        }, 600);
+
     },
     generateIpsum:function(callback) {
         if (api.running.generateIpsum)  { return; }

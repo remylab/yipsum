@@ -48,11 +48,13 @@ func main() {
         TokenLookup: "form:csrf",
         CookiePath: "/",
     }
+
     mCsrf := middle.CSRFWithConfig(csrfConfig)
     mAuth := middle.CheckAdminAuth(dbm, store)
+    mCaptcha := middle.ValidateRecaptcha(common.GetRecaptchaKey())
 
     // Public Routes
-    e.GET("/", h.Index)
+    e.GET("/", h.Index, mCaptcha)
     e.GET("/:ipsum", h.Ipsum)
     e.GET("/:ipsum/adm", h.AdminOff)
 
@@ -71,7 +73,9 @@ func main() {
     e.POST("/api/s/:ipsum/addtext", h.AddText, mCsrf, mAuth)
     e.POST("/api/s/:ipsum/updatetext", h.UpdateText, mCsrf, mAuth)
     e.POST("/api/s/:ipsum/deletetext", h.DeleteText, mCsrf, mAuth)
-    e.GET("/api/s/:ipsum/resetkey", h.ResetKey, mCsrf, mAuth)
+
+    e.POST("/api/s/:ipsum/resetkey", h.Index, mCsrf, mAuth, mCaptcha)
+    e.POST("/api/s/:ipsum/delete", h.Index, mCsrf, mAuth, mCaptcha)
 
     /*// (LINUX ONLY) don't drop connections with stop restart
     std := standard.New(":1424")
