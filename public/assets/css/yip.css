@@ -15,7 +15,29 @@
     border-radius: 8px;
     border: solid 2px #2B778C;
 }
+.pagination {
+    margin:4px;
+}
+.row-settings {
+    margin:10px 0 0px 0;
+}
+.row-settings h2 {
+    margin-bottom : 4px;
+}
+.row-settings-box {
+    padding : 4px 4px 0 4px;
+    margin: 0 4px 0     px 4px;
+}
 
+.btn-settings {
+    margin-top:22px;
+}
+.col-settings {
+    margin:0 !important;
+}
+.p-current {
+    background-color: #D8E6EA !important;
+}
 #createsuccess h3 {
 	padding : 20px;
 }
@@ -169,6 +191,9 @@ textarea {
         padding: 2px 4px !important;
     }
     .row-yiptext textarea, .yiptext-add textarea {
+    }
+    .row-settings {
+        margin:40px 0 4px 0;
     }
 }
 

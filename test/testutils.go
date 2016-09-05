@@ -21,7 +21,8 @@ func GetEcho() *echo.Echo {
 func ImportData(targetDb string, script string) error {
 
     var err error
-    // cat conf/evol/createdb.sql | sqlite3 work/yipsum.db
+    // cat conf/evol/createdb.sql | sqlite3 work/yipsum.db 
+    // sqlite3 work/yipsum.db < conf/evol/createdb.sql
     c1 := exec.Command("cat", common.GetRootPath()+script)
     c2 := exec.Command("sqlite3", targetDb)
     c2.Stdin, err = c1.StdoutPipe()

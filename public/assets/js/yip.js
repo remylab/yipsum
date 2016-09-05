@@ -238,7 +238,6 @@ var Admin = (function() {
         });
     };
 
-
     onClickDelete = function() {
         var $e = $(this).closest('.row-yiptext') 
         api.deleteQuote($e, onDeleteResult)
@@ -306,11 +305,11 @@ var Admin = (function() {
         }
     };
 
-    onClickEdit = function($e) {
+    onClickEdit = function() {
         if (api.running.editQuote)  { return; }
 
         var $e = $(this).closest('.row-yiptext') 
-        $('.msg',$e).html("");
+        $('.msg', $e).html("");
 
         var t1 = $('.yiptext',$e).html().trim(), t2 = $('.yiptext-edit textarea',$e).val().trim();
 
@@ -350,6 +349,103 @@ var Admin = (function() {
     };
 }());
 
+var Settings = (function() {
+    "use strict";
+    var 
+    init,
+    bindUIActions,
+    onClickSettings,
+    onClickSettingsAction,
+    onSettingResult
+    ;
+
+    init = function(){
+        bindUIActions();
+    };
+
+    bindUIActions = function() {
+
+        $('.btn-settings').click(onClickSettings);
+        $('.btn-resetkey').click( onClickSettingsAction("resetkey") );
+        $('.btn-deleteyip').click( onClickSettingsAction("delete") );
+
+    };
+
+
+    onClickSettings = function() {
+        if ( $(this).hasClass('open') ) {
+            $('#settings-box').hide();
+        } else {
+            $("#settings-options").show();
+            $('#settings-box').show();
+        }
+        $(this).toggleClass('open');
+    };
+
+    onClickSettingsAction = function(type) {
+        return function() {
+            $('#settingsError').hide().html("");
+
+            var response = grecaptcha.getResponse();
+
+            if(response.length == 0) {
+                $('#settingsError').html("Please answer the captcha and try again").fadeIn();
+                setTimeout(function() {
+                    $('#settingsError').hide().html("");
+                }, 5000);
+            } else {
+                $('#settingsProgress').fadeIn();
+                api.settingsAction(type, response, onSettingResult(type));
+            }
+        }
+
+    };
+
+    onSettingResult = function(type) {
+
+        var successMsg = "";
+        if ( type == "resetkey") {
+            successMsg = "Thanks, a reset email has been sent to the admin of this Yipsum."
+        } else if ( type == "delete") {
+            successMsg = "Thanks, a delete email has been sent to the admin of this Yipsum."
+        }
+
+        return function(res){
+
+            $('#settingsProgress').hide();
+            grecaptcha.reset();
+
+            if (res.ok) {
+                $('#settingsInfo').html(successMsg).fadeIn();
+                $('#settings-options').hide();
+
+                setTimeout(function() {
+                    $('#settingsError').hide().html("");
+                    $('#settingsInfo').hide().html("");
+                    $('.btn-settings').click();
+                }, 7000);
+
+            } else {
+
+                var errorMsg = "Server error, please try again later.";
+                if ( res.msg == "wrong_captcha") {
+                    errorMsg = "Invalid captcha, please try again";
+                }
+                $('#settingsError').html(errorMsg).fadeIn();
+
+                setTimeout(function() {
+                    $('#settingsError').hide().html("");
+                    $('#settingsInfo').hide().html("");
+                }, 7000);
+            }
+        }
+    };
+
+    return {
+        init: init
+    };
+}());
+
 var numBetween = function(min,max) {
     return Math.floor(Math.random()*(max-min+1)+min);
 }
@@ -366,10 +462,8 @@ var Ipsum = (function() {
     ;
 
     init = function(){
-        if ( $('.btn-generate').length > 0 ) {
-            bindUIActions();
-            api.generateIpsum(onGenerateResult(true));   
-        }
+        bindUIActions();
+        api.generateIpsum(onGenerateResult(true));
     };
 
     bindUIActions = function() {
@@ -386,7 +480,7 @@ var Ipsum = (function() {
     }
 
     onClickGenerate = function() {
-        // only fetch data from server after 5 prints
+        // only re-fetch data from server after 5 prints
         if ( nbPrint > 5) {
             nbPrint = 0;
             $('#ipsum-text').html("loading...");
@@ -420,11 +514,8 @@ var Ipsum = (function() {
 
                     if ( typeof s != 'undefined' && s.length > 0 ) {
 
-                        if ( s.length < 20) {
-                            line +=  s + " ";
-                        } else {
-                            line = s;
-                        }
+                        s.length < 20 ? line +=  s + " " : line = s;
+
                         if ( line.length > 20 ) {
                             line = line.charAt(0).toUpperCase() + line.slice(1);
                             line = line.trim()
@@ -448,4 +539,5 @@ var Ipsum = (function() {
 
 CreateIpsum.init();
 Admin.init();
+Settings.init();
 Ipsum.init();

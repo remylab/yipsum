@@ -390,6 +390,9 @@ var Settings = (function() {
 
             if(response.length == 0) {
                 $('#settingsError').html("Please answer the captcha and try again").fadeIn();
+                setTimeout(function() {
+                    $('#settingsError').hide().html("");
+                }, 5000);
             } else {
                 api.settingsAction(type, response, onSettingResult(type));
             }

@@ -2,12 +2,12 @@
 function getKeyFromURL() {
     var x = window.location.href.split("?")[0];
     var y = x.split("/");
-    return y[5];
+    return (typeof y[5] != "undefined") ? y[5] : ""
 }
 function getIpsumFromURL() {
     var x = window.location.href.split("?")[0];
     var y = x.split("/");
-    return y[3];
+    return (typeof y[3] != "undefined") ? y[3] : ""
 }
 var api = {
     ipsumKey:getKeyFromURL(),
@@ -20,6 +20,33 @@ var api = {
         editQuote:false,
         deleteQuote:false,
         generateIpsum:false,
+        settingsAction:false
+    },
+    settingsAction:function(action, captchaResp, callback) {
+        if (api.running.settingsAction)  { return; }
+
+        var res = {ok:false,msg:"internal_error"}
+
+        var apiPre = "/api/";
+        if ( action == "delete") { apiPre += "s/"}
+
+        $.post( apiPre + api.ispumUri + "/" + action , {
+            csrf:$('#csrf').val(),
+            key:api.ipsumKey,
+            caprep:captchaResp
+        })
+        .done(function(data) {
+            callback(data);
+        })
+        .fail(function(data, statusText, xhr) {
+            if ( xhr == "Forbidden" ) {
+                res.msg = "forbidden";
+            }
+            callback(res);
+        })
+        .always(function() {
+            api.running.settingsAction = false;
+        });
     },
     generateIpsum:function(callback) {
         if (api.running.generateIpsum)  { return; }

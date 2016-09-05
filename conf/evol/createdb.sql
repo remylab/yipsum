@@ -5,8 +5,10 @@ CREATE TABLE IF NOT EXISTS ipsums(
     desc TEXT,
     adminEmail TEXT NOT NULL,
     adminKey TEXT NOT NULL,
-    resetEmailToken TEXT,
-    resetKeyToken TEXT,
+    resetToken TEXT,
+    resetTS INTEGER,
+    deleteToken TEXT,
+    deleteTS INTEGER,
     created INTEGER
 );
 

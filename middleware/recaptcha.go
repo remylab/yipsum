@@ -1,11 +1,9 @@
 package middleware
 
 import (
-    "fmt"
-    "bytes"
+    //"fmt"
     "net/http"
     "net/url"
-    "strconv"
     "strings"
     "encoding/json"
     "io/ioutil"
@@ -32,37 +30,23 @@ func ValidateRecaptcha(secretKey string) echo.MiddlewareFunc {
             
             c.Set("g-recaptcha-is-valid", false) // init
 
-            gresponse := c.FormValue("g-recaptcha-response")
+            gresponse := c.FormValue("caprep")
 
             if len(strings.TrimSpace(gresponse)) == 0 || len(strings.TrimSpace(secretKey)) == 0 {
                 return next(c)
             }
 
-            apiUrl := "https://www.google.com/recaptcha/api/siteverify"
-            data := url.Values{}
-            data.Set("secret", secretKey)
-            data.Add("g-recaptcha-response", gresponse)
+            data := url.Values{"secret": {secretKey}, "response": {gresponse}}
+            resp, err := http.PostForm( "https://www.google.com/recaptcha/api/siteverify", data)
 
-            u, _ := url.ParseRequestURI(apiUrl)
-            urlStr := fmt.Sprintf("%v", u)
-
-            client := &http.Client{}
-            r, _ := http.NewRequest("POST", urlStr, bytes.NewBufferString(data.Encode())) 
-            r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-            r.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
-
-            resp, err := client.Do(r)
-            if resp != nil {
-                defer resp.Body.Close()
-            }
+            if resp != nil { defer resp.Body.Close() }
             if err != nil { return next(c) }
 
             body, err := ioutil.ReadAll(resp.Body)
             if err != nil { return next(c) }
         
             jsonRes, err := getResult([]byte(body))
-            
-            fmt.Printf("jsonRes : %v\n",jsonRes)
+            c.Set("g-recaptcha-is-valid", jsonRes.Success) // google response
 
             return next(c)            
         }

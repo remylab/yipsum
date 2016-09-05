@@ -52,15 +52,18 @@ func (m *SqliteManager) Close() error {
 }
 
 
-func (m *SqliteManager) UpdateResetKey(ipsumId int64) (sqlRes, error) {
+func (m *SqliteManager) UpdateToken(tokenField string, ipsumId int64) (sqlRes, error) {
     ret := sqlRes{false,""}
 
-    stmt, err := m.db.Prepare("UPDATE ipsums set resetKeyToken=? where id=?")
+    // resetToken / resetTS or deleteToken / deleteTS
+    stmt, err := m.db.Prepare("UPDATE ipsums set "+tokenField+"Token=?, "+tokenField+"TS=?  where id=?")
     if err != nil {return ret,err}
     defer stmt.Close()
 
-    token := random.String(32)
-    res, err := stmt.Exec(token, ipsumId)
+    token := random.String(64)
+    created := common.GetTimestamp()
+
+    res, err := stmt.Exec(token, created, ipsumId)
     if err != nil {return ret,err}
 
     rowCnt, err := res.RowsAffected()
@@ -249,18 +252,20 @@ func (m *SqliteManager) GetIpsum(s string) (map[string]string, error) {
         "adminEmail":"",
     }
 
-    stmt, err := m.db.Prepare("select id, name, desc, adminEmail from ipsums where uri = ?")
+    stmt, err := m.db.Prepare("select id, name, desc, adminEmail, resetTS, deleteTS from ipsums where uri = ?")
     if err != nil {return ipsumMap, err}
     defer stmt.Close()
 
-    var s1, s2, s3, s4 sql.NullString
-    err = stmt.QueryRow(s).Scan(&s1,&s2,&s3,&s4)
+    var s1, s2, s3, s4, s5, s6 sql.NullString
+    err = stmt.QueryRow(s).Scan(&s1,&s2,&s3,&s4,&s5,&s6)
     if err != nil {return ipsumMap, err}
     
     if ( s1.Valid ) { ipsumMap["id"] = s1.String };
     if ( s2.Valid ) { ipsumMap["name"] = s2.String }; 
     if ( s3.Valid ) { ipsumMap["desc"] = s3.String }; 
     if ( s4.Valid ) { ipsumMap["adminEmail"] = s4.String }; 
+    if ( s5.Valid ) { ipsumMap["resetTS"] = s5.String }; 
+    if ( s6.Valid ) { ipsumMap["deleteTS"] = s6.String }; 
 
     return ipsumMap, nil
 }

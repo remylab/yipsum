@@ -23,6 +23,11 @@ type (
     Template struct {
         templates *template.Template
     }
+
+    sqlRes struct {
+        Ok bool `json:"ok"`
+        Msg string `json:"msg"`
+    }
 )
 
 func SendMail(sender string, recipient string, subject string, msg string)  {
@@ -92,8 +97,8 @@ func GetRecaptchaKey() string {
     return os.Getenv("yip_grecaptcha_key")
 }
 
-func GetTimestamp() int32 {
-    return int32(time.Now().Unix())
+func GetTimestamp() int64 {
+    return int64(time.Now().Unix())
 }
 
 func GetTemplate() *Template {
@@ -159,8 +164,6 @@ func GetSentences(text string) []string {
                     }
                 }
             }
-
-            
 
         } else {
             if ( len(line) > 0 ) {

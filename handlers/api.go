@@ -1,7 +1,7 @@
 package handlers
 
 import (
-    //"fmt"
+    "fmt"
     "net/http"
     "strings"
     "strconv"
@@ -16,6 +16,11 @@ type (
         Msg string `json:"msg"`
         Values []string `json:"values"`
     }
+
+    sqlRes struct {
+        Ok bool `json:"ok"`
+        Msg string `json:"msg"`
+    }
 )
 
 
@@ -27,18 +32,62 @@ func  (h *Handler)ResetKey(c echo.Context) error {
     if ( err != nil ) {
         return echo.NewHTTPError(http.StatusNotFound, err.Error())
     }
-    s_ipsumId := ipsumMap["id"]
-    ipsumId, _ := strconv.ParseInt(s_ipsumId, 10, 32)
+    ipsumId, _ := strconv.ParseInt(ipsumMap["id"], 10, 32)
+    resetTS, _ := strconv.ParseInt(ipsumMap["resetTS"], 10, 32)
 
-    ret, err := h.Dbm.UpdateResetKey(ipsumId)
+    now := common.GetTimestamp()
+
+    fmt.Printf("resetTS = %v\n",resetTS)
+
+    deltaSec := now - resetTS
+    // one reset every 2 hours maximum
+    if ( deltaSec < 2*3600) {
+        return c.JSON(http.StatusOK, sqlRes{true,""})
+    }
+
+    ret, err := h.Dbm.UpdateToken("reset", ipsumId)
+    fmt.Printf("UpdateToken err = %v\n",err)
     if ( err != nil ) { return err }
 
     if (ret.Ok) {
         msg := "Hi,\r\n\r\nDid you request a key reset for "+ ipsumMap["name"] +" Yipsum?\r\n\r\n"
-        msg += "If yes, please click here to proceed : http://" + common.GetDomain() + "/" + ipsum + "/resetkey/" + ret.Msg
+        msg += "If yes, please click the link below proceed : \r\n\r\nhttp://" + common.GetDomain() + "/" + ipsum + "/resetkey/" + ret.Msg
 
-        common.SendMail("no-reply@yipsum.com", ipsumMap["adminEmail"], "Yipsum : Reset Key", msg)
-        ret.Msg = ""
+        common.SendMail("no-reply@yipsum.com", ipsumMap["adminEmail"], "Yipsum : Reset key request", msg)
+        ret.Msg = "" // don't sent back token to the client !!!
+    }
+
+    return c.JSON(http.StatusOK, ret)
+}
+
+// POST = "/api/s/:ipsum/delete" 
+func  (h *Handler)DeleteIpsum(c echo.Context) error {
+
+    ipsum := c.Param("ipsum") 
+    ipsumMap, err := h.Dbm.GetIpsum( ipsum )
+    if ( err != nil ) {
+        return echo.NewHTTPError(http.StatusNotFound, err.Error())
+    }
+    ipsumId, _ := strconv.ParseInt(ipsumMap["id"], 10, 32)
+    deleteTS, _ := strconv.ParseInt(ipsumMap["deleteTS"], 10, 32)
+
+    now := common.GetTimestamp()
+
+    deltaSec := now - deleteTS
+    // one delete request every 24 hours maximum
+    if ( deltaSec < 24*3600) {
+        return c.JSON(http.StatusOK, sqlRes{true,""})
+    }
+
+    ret, err := h.Dbm.UpdateToken("delete", ipsumId)
+    if ( err != nil ) { return err }
+
+    if (ret.Ok) {
+        msg := "Hi,\r\n\r\nDid you request to delete "+ ipsumMap["name"] +" Yipsum?\r\n\r\n"
+        msg += "If yes, please click the link below to proceed (this Yispum will be removed forever!!!) : \r\n\r\nhttp://" + common.GetDomain() + "/" + ipsum + "/delete/" + ret.Msg
+
+        common.SendMail("no-reply@yipsum.com", ipsumMap["adminEmail"], "Yipsum : Delete request", msg)
+        ret.Msg = "" // don't sent back token to the client !!!
     }
 
     return c.JSON(http.StatusOK, ret)

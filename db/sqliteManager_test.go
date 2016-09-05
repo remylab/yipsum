@@ -10,14 +10,18 @@ import (
 )
 
 
-func TestUpdateResetKey(t *testing.T) {
+func TestUpdateToken(t *testing.T) {
 
     dbm, _ := NewSqliteManager("./TestUpdateResetKey.db")
     defer AfterDbTest(dbm,"./TestUpdateResetKey.db")()
 
     test.LoadTestData("./TestUpdateResetKey.db","./sqliteManager_test.TestUpdateResetKey.sql")
 
-    _, err := dbm.UpdateResetKey(562)
+    var err error
+    _, err = dbm.UpdateToken("reset", 562)
+    assert.Nil(t,err)
+
+    _, err = dbm.UpdateToken("delete", 562)
     assert.Nil(t,err)
 }
 
