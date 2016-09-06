@@ -145,7 +145,7 @@ var CreateIpsum = (function() {
         if (res.ok) {
             uri = res.msg
             util.displayHelp($uri,"success");
-            $("#btn-yipurl").html("yipsum.com/"+uri);
+            $("#btn-yipurl").html("http://yipsum.com/"+uri);
         } else {
             if ( res.msg == "internal_error") {
                 util.displayHelp($uri,"error","Unexpected error, URL validation failed");
@@ -160,8 +160,8 @@ var CreateIpsum = (function() {
         var $msg = $( "#messages" );
         if (res.ok) {
 
-            $('#yipurladm').html("yipsum.com/"+uri+"/adm/"+res.msg).attr('href',"/"+uri+"/adm/"+res.msg);
-            $('#yipurl').html("yipsum.com/"+uri).attr('href',"/"+uri);
+            $('#yipurladm').html("http://yipsum.com/"+uri+"/adm/"+res.msg).attr('href',"/"+uri+"/adm/"+res.msg);
+            $('#yipurl').html("http://yipsum.com/"+uri).attr('href',"/"+uri);
 
             var $yipin = $('#yipurladm-in');
             $yipin.val("http://yipsum.com/"+uri+"/adm/"+res.msg);
@@ -366,11 +366,10 @@ var Settings = (function() {
     bindUIActions = function() {
 
         $('.btn-settings').click(onClickSettings);
-        $('.btn-resetkey').click( onClickSettingsAction("reset") );
+        $('.btn-resetkey').click( onClickSettingsAction("resetkey") );
         $('.btn-deleteyip').click( onClickSettingsAction("delete") );
 
     };
-
 
     onClickSettings = function() {
         if ( $(this).hasClass('open') ) {
@@ -394,16 +393,16 @@ var Settings = (function() {
                     $('#settingsError').hide().html("");
                 }, 5000);
             } else {
+                $('#settingsProgress').fadeIn();
                 api.settingsAction(type, response, onSettingResult(type));
             }
         }
-
     };
 
     onSettingResult = function(type) {
 
         var successMsg = "";
-        if ( type == "reset") {
+        if ( type == "resetkey") {
             successMsg = "Thanks, a reset email has been sent to the admin of this Yipsum."
         } else if ( type == "delete") {
             successMsg = "Thanks, a delete email has been sent to the admin of this Yipsum."
@@ -411,6 +410,7 @@ var Settings = (function() {
 
         return function(res){
 
+            $('#settingsProgress').hide();
             grecaptcha.reset();
 
             if (res.ok) {
@@ -493,14 +493,13 @@ var Ipsum = (function() {
         var nbPar = numBetween(2,5);
 
         var sizePar = 0;
-
         var lastIndex = res.length-1;
 
         if ( lastIndex < 0 ) {
             $('#ipsum-text').html("Hum... looks like this Yipsum is under construction, nothing to show yet...");
         } else {
 
-            var ends =[".",".",".","...","?","!"];
+            var ends =[".",".",".",".",".",".",".",".","...","?","!"];
             var par = "", ipsum = "";
             for (var i = 1; i <= nbPar; i++) { 
                 sizePar = numBetween(100,600);

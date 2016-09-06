@@ -2,6 +2,23 @@
     text-align: center;
 }
 
+.yipteasers div[class^="col"] {
+    padding:4px !important;
+}
+
+.yipteaser h3 {
+    color:#333;
+}
+
+.yipteaser {
+    padding: 0 4px;
+    border-radius: 12px;
+    border: solid 1px #2B778C;
+    height: 120px ;
+    overflow:hidden;
+}
+
+}
 .container {
     width:98%;
 }

@@ -57,6 +57,8 @@ func main() {
     e.GET("/", h.Index)
     e.GET("/:ipsum", h.Ipsum)
     e.GET("/:ipsum/adm", h.AdminOff)
+    e.GET("/:ipsum/resetkey/:token", h.ResetKeyProcess)
+    e.GET("/:ipsum/delete/:token", h.DeleteProcess)
 
     e.GET("/api/checkname", h.CheckName)
     e.POST("/api/createipsum", h.CreateIpsum)

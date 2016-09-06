@@ -84,6 +84,9 @@ func SendMail(sender string, recipient string, subject string, msg string)  {
     }
 }
 
+func GetAdminKeyLength() int {
+    return 10
+}
 func GetDomain() string {
     return os.Getenv("yip_domain")
 }

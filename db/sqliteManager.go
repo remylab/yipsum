@@ -52,6 +52,16 @@ func (m *SqliteManager) Close() error {
 }
 
 
+func (m *SqliteManager) RemoveResetToken(ipsum string) (error) {
+
+    stmt, err := m.db.Prepare("UPDATE ipsums set resetToken=null, resetTS=0 where uri=?")
+    if err != nil {return err}
+    defer stmt.Close()
+
+    _ , execErr := stmt.Exec(ipsum)
+    return execErr
+}
+
 func (m *SqliteManager) UpdateToken(tokenField string, ipsumId int64) (sqlRes, error) {
     ret := sqlRes{false,""}
 
@@ -243,6 +253,92 @@ func (m *SqliteManager)GetIpsumTextsForPage(ipsumId int64, pageNum int64, resByP
     return texts, nil
 }
 
+func (m *SqliteManager) ProcessDeleteAction(ipsum string, token string) (sqlRes, error) {
+
+    res := sqlRes{false,"invalid_token"}
+
+    stmt, err := m.db.Prepare("select deleteTS from ipsums where uri = ? and deleteToken = ?")
+    if err != nil {return res, err}
+    defer stmt.Close()
+
+    var ts int64
+    err = stmt.QueryRow(ipsum,token).Scan(&ts)
+    if err != nil { return res, err }
+
+    now := common.GetTimestamp()
+    deltaSec := now - ts
+
+    if (deltaSec > 3600) {
+        res.Msg = "token_expired"
+    } else {
+
+        res.Msg = "internal_error"
+
+        ipsumMap, getErr := m.GetIpsum( ipsum )
+        if getErr != nil { return res, getErr }
+        ipsumId, _ := strconv.ParseInt(ipsumMap["id"], 10, 32)
+
+        stmt, err = m.db.Prepare("Delete from ipsumtext where ipsum_id=?")
+        if err != nil {  return res, err} 
+
+        delRes, delErr := stmt.Exec(ipsumId)
+        if delErr !=nil { return res, delErr} 
+
+        stmt, err = m.db.Prepare("Delete from ipsums where id=?")
+        if err != nil {  return res, err} 
+
+        delRes, delErr = stmt.Exec(ipsumId)
+        if delErr !=nil { return res, delErr} 
+
+        rowCount, _ := delRes.RowsAffected()
+        if (rowCount == 1) {
+            res.Ok = true
+        }
+    }
+
+    return res, nil
+}
+
+func (m *SqliteManager) ProcessResetAction(ipsum string, token string) (sqlRes, error) {
+
+    res := sqlRes{false,"invalid_token"}
+
+    stmt, err := m.db.Prepare("select resetTS from ipsums where uri = ? and resetToken = ?")
+    if err != nil {return res, err}
+    defer stmt.Close()
+
+    var ts int64
+    err = stmt.QueryRow(ipsum,token).Scan(&ts)
+    if err != nil { return res, err }
+
+    now := common.GetTimestamp()
+    deltaSec := now - ts
+
+    if (deltaSec > 3600) {
+        res.Msg = "token_expired"
+    } else {
+
+        res.Msg = "internal_error"
+
+        stmt, err = m.db.Prepare("UPDATE ipsums set adminKey=? where uri=?")
+        if err != nil {  return res, err} 
+        defer stmt.Close()
+
+        newKey := common.RandomString( common.GetAdminKeyLength() )
+        upRes, upErr := stmt.Exec(newKey, ipsum)
+        if upErr !=nil { return res, upErr} 
+
+        rowCount, _ := upRes.RowsAffected()
+
+        if (rowCount == 1) {
+            res.Ok = true
+            res.Msg = newKey
+        }
+    }
+
+    return res, nil
+}
+
 func (m *SqliteManager) GetIpsum(s string) (map[string]string, error) {
 
     ipsumMap := map[string]string{
@@ -302,7 +398,7 @@ func (m *SqliteManager) IsNewUri(s string) (bool,error) {
 func (m *SqliteManager) CreateIpsum(name string, desc string, uri string, adminEmail string) (sqlRes, error) {
 
     ret := sqlRes{false,""}
-    adminKey := common.RandomString(7)
+    adminKey := common.RandomString( common.GetAdminKeyLength() )
 
     name = template.HTMLEscapeString(name)
     uri = common.GetUri(uri)

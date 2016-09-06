@@ -7,8 +7,50 @@ import (
     "github.com/stretchr/testify/assert"
 
     "github.com/remylab/yipsum/test"
+    "github.com/remylab/yipsum/common"
 )
 
+
+func TestProcessDeleteAction(t *testing.T) {
+
+    dbm, _ := NewSqliteManager("./TestProcessDeleteAction.db")
+    //defer AfterDbTest(dbm,"./TestProcessDeleteAction.db")()
+
+    test.LoadTestData("./TestProcessDeleteAction.db","./sqliteManager_test.TestProcessDeleteAction.sql")
+
+    var err error; var res sqlRes
+    res, err = dbm.ProcessDeleteAction("jon-snow", "good-delete-token")
+    assert.Nil(t,err)
+
+    assert.Equal(t, true, res.Ok, "good token should be processed")
+
+    res, err = dbm.ProcessDeleteAction("jon-snow2", "expired-delete-token")
+    assert.Nil(t,err)
+
+    assert.Equal(t, false, res.Ok, "expired token should not be processed")
+}
+
+func TestProcessResetAction(t *testing.T) {
+
+    dbm, _ := NewSqliteManager("./TestProcessResetAction.db")
+    defer AfterDbTest(dbm,"./TestProcessResetAction.db")()
+
+    test.LoadTestData("./TestProcessResetAction.db","./sqliteManager_test.TestProcessResetAction.sql")
+
+    var err error; var res sqlRes
+    res, err = dbm.ProcessResetAction("jon-snow", "good-reset-token")
+    assert.Nil(t,err)
+
+    assert.Equal(t, res.Ok,true, "good token should be processed")
+    assert.Equal(t, len(res.Msg), common.GetAdminKeyLength() , "new adminKey should be provided")
+
+    res, err = dbm.ProcessResetAction("jon-snow2", "expired-reset-token")
+    assert.Nil(t,err)
+
+    assert.Equal(t, res.Ok, false, "expired token should not be processed")
+    assert.Equal(t, res.Msg, "token_expired")
+
+}
 
 func TestUpdateToken(t *testing.T) {
 
@@ -128,8 +170,8 @@ func TestCreateIpsum(t *testing.T) {
 
     res, err := dbm.CreateIpsum("les bronzes", "quote du film les bronzes", "les-bronzes", "admin@email.com")
     assert.Nil(t,err)
-    assert.Equal(t, res.Ok,true,"insert in empty DB should work")
-    assert.Equal(t, len(res.Msg),7,"adminKey length should be 7")
+    assert.Equal(t, res.Ok,true, "insert in empty DB should work")
+    assert.Equal(t, len(res.Msg), common.GetAdminKeyLength(), "adminKey length should be 7")
 
     res, err = dbm.CreateIpsum("les bronzes", "quote du film les bronzes", "les-bronzes", "admin@email.com")
     assert.NotNil(t,err)

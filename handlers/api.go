@@ -72,8 +72,8 @@ func  (h *Handler)DeleteIpsum(c echo.Context) error {
     deleteTS, _ := strconv.ParseInt(ipsumMap["deleteTS"], 10, 32)
 
     now := common.GetTimestamp()
-
     deltaSec := now - deleteTS
+    
     // one delete request every 24 hours maximum
     if ( deltaSec < 24*3600) {
         return c.JSON(http.StatusOK, sqlRes{true,""})

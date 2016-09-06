@@ -88,7 +88,16 @@
                         The rest of the world will access your Yipsum here : <a href="" id="yipurl">http://yipsum.com/test</a>
                     </li>
                 </p>
-            <div>
+            </div>
+
+            <h3>Latest Yipsums</h3>
+            <div class="container-fluid yipteasers">
+                <div class="row">
+                {{ range $t := .teasers }}
+                    {{template "ipsumteaser" $t }}
+                {{end}}
+                </div>
+            </div>
         </div>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>

@@ -1,0 +1,2 @@
+insert into ipsums(id,name,desc,uri,adminKey,adminEmail,deleteToken, deleteTS) values(562,'Jon Snow','Best Jon Snow quotes','jon-snow','keY0ek','admin@email.com','good-delete-token', 9222111000 );
+insert into ipsums(id,name,desc,uri,adminKey,adminEmail,deleteToken, deleteTS) values(563,'Jon Snow','Best Jon Snow quotes','jon-snow2','keY0ek','admin@email.com','expired-delete-token', 1222111000 );

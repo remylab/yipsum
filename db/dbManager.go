@@ -19,4 +19,7 @@ type DbManager interface {
     UpdateText(ipsumId int64, dataId int64, text string) (sqlRes, error)
     DeleteText(ipsumId int64, dataId int64) (sqlRes, error)
     UpdateToken(tokenField string, ipsumId int64) (sqlRes, error)
+    RemoveResetToken(ipsum string) (error)
+    ProcessResetAction(ipsum string, token string) (sqlRes, error)
+    ProcessDeleteAction(ipsum string, token string) (sqlRes, error)
 }

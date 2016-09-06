@@ -10,6 +10,7 @@ import (
     "github.com/labstack/echo/engine/standard"
 
     "github.com/remylab/yipsum/db"
+    "github.com/remylab/yipsum/common"
 
     "github.com/gorilla/sessions"
 )
@@ -40,7 +41,7 @@ func isAdmin(c echo.Context, store *sessions.CookieStore) bool {
 }
 
 // URI = "/:ipsum"
-func  (h *Handler)Ipsum(c echo.Context) error {
+func (h *Handler)Ipsum(c echo.Context) error {
 
     ipsumMap, err := h.Dbm.GetIpsum( c.Param("ipsum") )
     
@@ -54,9 +55,71 @@ func  (h *Handler)Ipsum(c echo.Context) error {
     return c.Render(http.StatusOK, "ipsum", model)
 }
 
+// URI = "/:ipsum/delete/:token"
+func (h *Handler)DeleteProcess(c echo.Context) error {
+
+    ipsum := c.Param("ipsum")
+    res, _ := h.Dbm.ProcessDeleteAction( ipsum, c.Param("token") )
+
+    message := ""
+    if ( res.Ok ) {
+        message = "Thank you, the Yipsum [" + common.GetDomain() + "/" + ipsum + "] has been removed."
+
+        h.Dbm.RemoveResetToken(ipsum)
+    } else {
+        message = "Sorry this token is invalid or has expired, please try-again."
+    }
+
+    model := map[string]interface{}{
+        "action": "Delete",
+        "message": message,
+    }
+
+    return c.Render(http.StatusOK, "processaction", model)
+}
+
+// URI = "/:ipsum/resetkey/:token"
+func (h *Handler)ResetKeyProcess(c echo.Context) error {
+
+    ipsum := c.Param("ipsum")
+    res, _ := h.Dbm.ProcessResetAction( ipsum, c.Param("token") )
+
+    message := ""
+    if ( res.Ok ) {
+        adminURL :="http://" + common.GetDomain() + "/" + ipsum + "/adm/" + res.Msg
+        message = "Thank you, the new admin URL is : " + adminURL
+
+        h.Dbm.RemoveResetToken(ipsum)
+    } else {
+        message = "Sorry this token is invalid or has expired, please try-again."
+    }
+
+    model := map[string]interface{}{
+        "action": "Reset admin key",
+        "message": message,
+    }
+
+    return c.Render(http.StatusOK, "processaction", model)
+}
+
 // URI = "/"
 func  (h *Handler)Index(c echo.Context) error {
-    return c.Render(http.StatusOK, "index", nil)
+
+    teasers := []map[string]string{}
+    for i := 1; i <= 10; i++ {
+        t := map[string]string{
+            "name": "name #" + strconv.Itoa(i),
+            "desc": "desc #" + strconv.Itoa(i),
+            "url": "#",
+        }
+        teasers = append(teasers,t)
+    }
+
+    model := map[string]interface{}{
+        "teasers": teasers,
+    }
+
+    return c.Render(http.StatusOK, "index", model)
 }
 
 // URI = "/:ipsum/adm" 
@@ -96,7 +159,6 @@ func  (h *Handler)Admin(c echo.Context) error {
     } else {
         page = "1"
     }
-
  
     ipsumId, _ := strconv.ParseInt(ipsumMap["id"], 10, 32)
     total, _ := h.Dbm.GetTotalIpsumTexts(ipsumId)
