@@ -188,6 +188,7 @@ func (h *Handler)AddText(c echo.Context) error {
     }
 
     id, _ := strconv.ParseInt(ipsumId, 10, 32)
+
     addRes, addErr := h.Dbm.AddText(id, text)
     if addErr != nil { return addErr; }
 
@@ -235,7 +236,9 @@ func (h *Handler)CreateIpsum(c echo.Context) error {
     res.Values = err
 
     if ( res.Ok ) {
+        
         createRes, createErr := h.Dbm.CreateIpsum(name, desc, uri, email)
+
         if ( !createRes.Ok || createErr != nil ) {
             res.Ok = false
             if (createRes.Msg == "taken") {

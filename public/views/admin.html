@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
         <title>{{index .ipsum "name"}} Admin @Yipsum</title>
+        <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
 
         <!-- Latest compiled and minified CSS -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
@@ -101,26 +102,6 @@
         <script src="/static/js/yip.js"></script>
     </body>
 </html>
-{{end}}
-
-{{define "pagination"}}
-
-    {{ $length := len .pages }} {{ if gt $length 1 }}
-    <div class="row" style="text-align:center;">
-        <ul class="pagination">
-            {{ range $key, $value := .pages }}
-                {{ if eq $.current $value }}
-                    {{ $link := "" }} 
-                    <li><a class="p-{{$value}} p-current" href="javascript: void(0)">{{$value}}</a></li>              
-                {{ end }}
-                {{ if ne $.current $value }}
-                    {{ $link := "" }} 
-                    <li><a class="p-{{$value}}" href="{{$.uri}}{{$value}}">{{$value}}</a></li>              
-                {{ end }}
-            {{ end }}
-        </ul>
-    </div>
-    {{ end }}
 {{end}}
 
 {{define "yiptext"}}

@@ -534,7 +534,9 @@ var Ipsum = (function() {
     };
 }());
 
-CreateIpsum.init();
-Admin.init();
-Settings.init();
-Ipsum.init();
+if ( $('.helloyip').length == 1 ) CreateIpsum.init();
+if ( $('#settings-box').length == 1 ) {
+    Admin.init();
+    Settings.init();
+} 
+if ( $('.yipyip').length == 1 ) Ipsum.init();

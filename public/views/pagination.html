@@ -1,0 +1,20 @@
+{{define "pagination"}}
+    {{ $length := len .pages }} {{ if gt $length 1 }}
+    <div class="row" style="text-align:center;">
+        <ul class="pagination">
+            <li><a class="p-1" href="{{$.uri}}1"><<</a></li>    
+            {{ range $key, $value := .pages }}
+                {{ if eq $.current $value }}
+                    {{ $link := "" }} 
+                    <li><a class="p-{{$value}} p-current" href="javascript: void(0)">{{$value}}</a></li>              
+                {{ end }}
+                {{ if ne $.current $value }}
+                    {{ $link := "" }} 
+                    <li><a class="p-{{$value}}" href="{{$.uri}}{{$value}}">{{$value}}</a></li>              
+                {{ end }}
+            {{ end }}
+            <li><a class="p-{{.total}}" href="{{$.uri}}{{.total}}">>></a></li>    
+        </ul>
+    </div>
+    {{ end }}
+{{end}}

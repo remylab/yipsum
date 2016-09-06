@@ -55,6 +55,7 @@ func main() {
 
     // Public Routes
     e.GET("/", h.Index)
+    e.GET("/p/:page", h.Index)
     e.GET("/:ipsum", h.Ipsum)
     e.GET("/:ipsum/adm", h.AdminOff)
     e.GET("/:ipsum/resetkey/:token", h.ResetKeyProcess)

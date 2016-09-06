@@ -105,36 +105,35 @@ func (h *Handler)ResetKeyProcess(c echo.Context) error {
 // URI = "/"
 func  (h *Handler)Index(c echo.Context) error {
 
-    teasers := []map[string]string{}
-    for i := 1; i <= 10; i++ {
-        t := map[string]string{
-            "name": "name #" + strconv.Itoa(i),
-            "desc": "desc #" + strconv.Itoa(i),
-            "url": "#",
-        }
-        teasers = append(teasers,t)
+    var pageSize int64 ; pageSize = 30
+    
+    var nbPage int64; nbPage = 1
+    var page string
+    if page = c.Param("page") ; page != "" {
+        nbPage, _ = strconv.ParseInt(page, 10, 32)
+    } else {
+        page = "1"
     }
+
+    total, _ := h.Dbm.GetTotalIpsums()    
+
+    d := float64(total) / float64(pageSize)
+    totalPages := int(math.Ceil(d))
+
+    if totalPages > 0  && nbPage > int64(totalPages) && nbPage > 1{
+        return c.Redirect(http.StatusFound, "/" )
+    }
+
+    teasers, _ := h.Dbm.GetIpsumsForPage(nbPage, pageSize)
+
+    pagesModel := common.GetPagesModel("/p/", totalPages, nbPage)
 
     model := map[string]interface{}{
         "teasers": teasers,
+        "pages": pagesModel,
     }
 
     return c.Render(http.StatusOK, "index", model)
-}
-
-// URI = "/:ipsum/adm" 
-func  (h *Handler)AdminOff(c echo.Context) error {
-    
-    ipsum := c.Param("ipsum") 
-    ipsumMap, err := h.Dbm.GetIpsum( ipsum )
-    if ( err != nil ) {
-        return echo.NewHTTPError(http.StatusNotFound, err.Error())
-    }
-
-    model := map[string]interface{}{
-        "ipsum": ipsumMap,
-    }
-    return c.Render(http.StatusOK, "adminOff", model)
 }
 
 // URI = "/:ipsum/adm/:key" 
@@ -177,15 +176,7 @@ func  (h *Handler)Admin(c echo.Context) error {
 
     yiptexts, _ := h.Dbm.GetIpsumTextsForPage(ipsumId, nbPage, pageSize)
 
-    pages := make(map[int]string) 
-    for i := 1; i <= totalPages; i++ {
-        pages[i] = strconv.Itoa(i)
-    }
-    pagesModel := map[string]interface{}{
-        "pages":pages,
-        "uri":"/"+ipsum+"/adm/"+key+"/",
-        "current": page,
-    }
+    pagesModel := common.GetPagesModel("/"+ipsum+"/adm/"+key+"/", totalPages, nbPage)
 
     model := map[string]interface{}{
         "csrf": csrf,
@@ -197,6 +188,21 @@ func  (h *Handler)Admin(c echo.Context) error {
     }
 
     return c.Render(http.StatusOK, "admin", model)
+}
+
+// URI = "/:ipsum/adm" 
+func  (h *Handler)AdminOff(c echo.Context) error {
+    
+    ipsum := c.Param("ipsum") 
+    ipsumMap, err := h.Dbm.GetIpsum( ipsum )
+    if ( err != nil ) {
+        return echo.NewHTTPError(http.StatusNotFound, err.Error())
+    }
+
+    model := map[string]interface{}{
+        "ipsum": ipsumMap,
+    }
+    return c.Render(http.StatusOK, "adminOff", model)
 }
 
 // Errors

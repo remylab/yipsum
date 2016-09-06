@@ -90,14 +90,24 @@
                 </p>
             </div>
 
-            <h3>Latest Yipsums</h3>
-            <div class="container-fluid yipteasers">
-                <div class="row">
-                {{ range $t := .teasers }}
-                    {{template "ipsumteaser" $t }}
-                {{end}}
+
+            {{ $length := len .teasers }} {{ if gt $length 0 }}
+                <h3>Latest Yipsums</h3>
+
+                {{template "pagination" .pages }}
+
+                <div class="container-fluid yipteasers">
+                    <div class="row">
+                        {{ range $t := .teasers }}
+                            {{template "ipsumteaser" $t }}
+                        {{end}}
+                    </div>
                 </div>
-            </div>
+
+                {{template "pagination" .pages }}
+                
+            {{end}}
+
         </div>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>

@@ -7,6 +7,7 @@ import (
     "os"
     "time"
     "strings"
+    "strconv"
     "regexp"
     "math/rand"
     "text/template"
@@ -82,6 +83,38 @@ func SendMail(sender string, recipient string, subject string, msg string)  {
     if err != nil {
         log.Fatal(err)
     }
+}
+
+func GetPagesModel(baseURL string, totalPages int, nbPage int64 ) map[string]interface{} {
+    pageStart := 1; pageEnd := totalPages; nPage := int(nbPage)
+    if (totalPages > 10) {
+        if ( nPage  + 5 <= totalPages ) {
+            pageStart = nPage - 4
+            pageEnd = nPage + 5
+            if ( pageStart < 1 ) {
+                pageStart = 1
+                pageEnd = 10
+            }
+        } else {
+            delta := totalPages - nPage
+            pageStart = nPage - (10 - delta - 1)
+            pageEnd = totalPages
+        }
+    }
+
+    pages := make(map[int]string) 
+    for i := pageStart; i <= pageEnd; i++ {
+        pages[i] = strconv.Itoa(i)
+    }
+
+    page := strconv.Itoa( int(nbPage) )
+    pagesModel := map[string]interface{}{
+        "pages":pages,
+        "uri": baseURL,
+        "current": page,
+        "total": totalPages,
+    }
+    return pagesModel;    
 }
 
 func GetAdminKeyLength() int {

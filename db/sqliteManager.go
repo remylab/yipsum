@@ -156,6 +156,51 @@ func (m *SqliteManager) AddText(ipsumId int64, text string) (sqlRes, error) {
     return sqlRes{(rowCnt==1), sId}, err
 }
 
+func (m *SqliteManager)GetTotalIpsums() (int,error) {
+
+    stmt, err := m.db.Prepare("select count(1) total from ipsums")
+    if err != nil {return 0, err}
+    defer stmt.Close()
+
+    var count int
+    err = stmt.QueryRow().Scan(&count)
+    if err != nil {return 0, err}
+
+    return count, nil
+}
+
+func (m *SqliteManager)GetIpsumsForPage(pageNum int64, resByPage int64) ([]map[string]string, error) {
+
+    stmt, err := m.db.Prepare("select name, desc, uri from ipsums order by id desc limit ? offset ?")
+    if err != nil {return nil, err}
+    defer stmt.Close()
+
+    nbOffset := (pageNum-1) * resByPage
+    rows, err := stmt.Query(resByPage, nbOffset)
+    if err != nil {return nil, err}
+    defer rows.Close()
+
+    var name , desc, uri string
+
+    ipsums := []map[string]string{}
+    for rows.Next() {
+        err := rows.Scan(&name, &desc, &uri)
+        if err != nil {return nil, err}
+        t := map[string]string{
+            "name": name,
+            "desc": desc,
+            "url": "http://" + common.GetDomain() + "/" + uri,
+        }
+        ipsums = append(ipsums,t)
+    }
+
+    if err = rows.Err(); err != nil {
+        return nil, err
+    }
+
+    return ipsums, nil
+}
+
 func (m *SqliteManager)GetTotalIpsumTexts(ipsumId int64) (int,error) {
 
     stmt, err := m.db.Prepare("select count(1) total from ipsumtext where ipsum_id = ?")
@@ -167,57 +212,6 @@ func (m *SqliteManager)GetTotalIpsumTexts(ipsumId int64) (int,error) {
     if err != nil {return 0, err}
 
     return count, nil
-}
-
-func (m *SqliteManager)GenerateIpsum(ipsumId int64) ([]string,error) {
-    ret := []string{}
-
-    stmt, err := m.db.Prepare("select id, data from ipsumtext where ipsum_id = ? limit 1000;")
-    if err != nil {return nil, err}
-    defer stmt.Close()
-
-    rows, err := stmt.Query(ipsumId)
-    if err != nil {return nil, err}
-    defer rows.Close()
-
-    totalLength := 0
-
-    var id , data string
-    for rows.Next() {
-        err := rows.Scan(&id, &data)
-        if err != nil {return ret, err}
-
-        totalLength += len(data)
-        sentences := common.GetSentences(data)
-        ret = append(ret, sentences...)
-    }
-
-    if err = rows.Err(); err != nil {
-        return ret, err
-    }
-
-    targetLength := 1200
-
-    if (totalLength <= targetLength) {
-        return ret, nil
-    }
-
-    d := float64(totalLength) / float64(targetLength)
-    chances := int(math.Floor(d))
-
-    final := []string{}; finalCount := 0
-    for _, s := range ret {
-        yes := rand.Intn(chances) == 0
-        if ( yes ) {
-            finalCount += len(s)
-            final = append(final, s)
-            if ( finalCount > targetLength ) {
-                break
-            }
-        }
-    }
-
-    return final, nil
 }
 
 func (m *SqliteManager)GetIpsumTextsForPage(ipsumId int64, pageNum int64, resByPage int64) ([]map[string]string, error) {
@@ -426,4 +420,55 @@ func (m *SqliteManager) CreateIpsum(name string, desc string, uri string, adminE
     if err != nil {return ret,err}
 
     return sqlRes{(rowCnt==1),adminKey}, err
+}
+
+func (m *SqliteManager)GenerateIpsum(ipsumId int64) ([]string,error) {
+    ret := []string{}
+
+    stmt, err := m.db.Prepare("select id, data from ipsumtext where ipsum_id = ? limit 1000;")
+    if err != nil {return nil, err}
+    defer stmt.Close()
+
+    rows, err := stmt.Query(ipsumId)
+    if err != nil {return nil, err}
+    defer rows.Close()
+
+    totalLength := 0
+
+    var id , data string
+    for rows.Next() {
+        err := rows.Scan(&id, &data)
+        if err != nil {return ret, err}
+
+        totalLength += len(data)
+        sentences := common.GetSentences(data)
+        ret = append(ret, sentences...)
+    }
+
+    if err = rows.Err(); err != nil {
+        return ret, err
+    }
+
+    targetLength := 1200
+
+    if (totalLength <= targetLength) {
+        return ret, nil
+    }
+
+    d := float64(totalLength) / float64(targetLength)
+    chances := int(math.Floor(d))
+
+    final := []string{}; finalCount := 0
+    for _, s := range ret {
+        yes := rand.Intn(chances) == 0
+        if ( yes ) {
+            finalCount += len(s)
+            final = append(final, s)
+            if ( finalCount > targetLength ) {
+                break
+            }
+        }
+    }
+
+    return final, nil
 }
