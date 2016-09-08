@@ -1,7 +1,16 @@
+
 .helloyip {
     text-align: center;
 }
 
+.yipyip {
+    width:92% ;
+}
+
+.helloyip .form-horizontal .form-group {
+    margin-right:-4px;
+    margin-left:-4px;
+}
 .yipteasers div[class^="col"] {
     padding:4px !important;
 }
@@ -19,9 +28,6 @@
     overflow:hidden;
 }
 
-}
-.container {
-    width:98%;
 }
 .col-centered{
     float: none;
