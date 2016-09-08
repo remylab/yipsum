@@ -2,15 +2,15 @@
 // root user
 adduser remy
 usermod -aG sudo remy
-sudo usermod -a -G www-data remy
 
 // basics
-
--- nginx -- 
 sudo apt-get update
 sudo apt-get install git
 
+-- nginx -- 
+sudo apt-get update
 sudo apt-get install nginx
+
 sudo vi /etc/nginx/sites-enabled/default
 ##  
 server_name yipsum.com ;
@@ -34,26 +34,30 @@ sudo apt-get install sqlite3 libsqlite3-dev
 -- postfix -- 
 src : https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-postfix-as-a-send-only-smtp-server-on-ubuntu-16-04
 
+sudo apt install mailutils
+
 Option = Internet site
 System mail name = mail.yipsum.com
 
 sudo vi /etc/postfix/main.cf
 ##
-...
-myhostname = yipsum.com
 inet_interfaces = loopback-only
 mydestination = mail.yipsum.com, localhost.localdomain, localhost, yipsum.com
-...
 ##
 sudo systemctl restart postfix
 
-(( +DNS Record : TXT @ "v=spf1 mx -all"))
+sudo vi /etc/aliases
+##
+root:          your_email_address
+##
+sudo newaliases
 
 -- dkim -- 
 src : https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy
 
 sudo apt-get dist-upgrade
 sudo apt-get install opendkim opendkim-tools
+
 sudo vi /etc/opendkim.conf
 ## append 
 AutoRestart             Yes
@@ -78,10 +82,7 @@ UserID                  opendkim:opendkim
 
 Socket                  inet:12301@localhost
 ##
-sudo vi /etc/aliases
-##
-root:          your_email_address
-##
+
 
 sudo vi /etc/default/opendkim
 ## append
@@ -96,8 +97,7 @@ smtpd_milters = inet:localhost:12301
 non_smtpd_milters = inet:localhost:12301
 ##
 
-sudo mkdir /etc/opendkim
-sudo mkdir /etc/opendkim/keys
+sudo mkdir -p /etc/opendkim/keys
 
 sudo vi /etc/opendkim/TrustedHosts
 ##
@@ -141,31 +141,37 @@ sudo mkdir -p /usr/local/work/go
 sudo chown -R remy /usr/local/work
 export GOPATH=/usr/local/work/go
 
-cd /usr/local/work/go/src/github.com
-mkdir remylab
-git clone https://github.com/remylab/yipsum.git
-
 go get -u github.com/labstack/echo
 go get github.com/gorilla/sessions
 go get github.com/mattn/go-sqlite3
 go get github.com/dgrijalva/jwt-go 
 
-// web server user & group
-mkdir /var/www/yipsum
+
+cd /usr/local/work/go/src/github.com
+mkdir -p remylab/yipsum
 
 sudo adduser yipsum
-sudo usermod -a -G www-data yipsum
 
-sudo chown -R yipsum:www-data /usr/local/work/go/src/github.com/remylab/yipsum
+sudo chown -R yipsum /usr/local/work/go/src/github.com/remylab/yipsum
 sudo chmod -R 750 /usr/local/work/go/src/github.com/remylab/yipsum
 sudo chmod -R g+s /usr/local/work/go/src/github.com/remylab/yipsum
 
 su yipsum
+
 vi ~/.profile
-## edit
+## 
 export GOROOT=/usr/local/go
 export PATH=$PATH:$GOROOT/bin
 export GOPATH=/usr/local/work/go
+##
 source ~/.profile
 
+cd remylab
+git clone https://github.com/remylab/yipsum.git ./yipsum
+cd yipsum
+mkdir work
+cp setup_dev_en.sh work/prod_env.sh
+// fix prod env...
+source work/prod_env.sh
 
+sqlite3 work/yipsum.db < conf/evol/createdb.sql

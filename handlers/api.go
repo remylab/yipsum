@@ -51,7 +51,7 @@ func  (h *Handler)ResetKey(c echo.Context) error {
 
     if (ret.Ok) {
         msg := "Hi,\r\n\r\nDid you request a key reset for "+ ipsumMap["name"] +" Yipsum?\r\n\r\n"
-        msg += "If yes, please click the link below proceed : \r\n\r\nhttp://" + common.GetDomain() + "/" + ipsum + "/resetkey/" + ret.Msg
+        msg += "If yes, please click the link below proceed : \r\n\r\n" + common.GetDomain() + "/" + ipsum + "/resetkey/" + ret.Msg
 
         common.SendMail("no-reply@yipsum.com", ipsumMap["adminEmail"], "Yipsum : Reset key request", msg)
         ret.Msg = "" // don't sent back token to the client !!!
@@ -84,7 +84,7 @@ func  (h *Handler)DeleteIpsum(c echo.Context) error {
 
     if (ret.Ok) {
         msg := "Hi,\r\n\r\nDid you request to delete "+ ipsumMap["name"] +" Yipsum?\r\n\r\n"
-        msg += "If yes, please click the link below to proceed (this Yispum will be removed forever!!!) : \r\n\r\nhttp://" + common.GetDomain() + "/" + ipsum + "/delete/" + ret.Msg
+        msg += "If yes, please click the link below to proceed (this Yispum will be removed forever!!!) : \r\n\r\n" + common.GetDomain() + "/" + ipsum + "/delete/" + ret.Msg
 
         common.SendMail("no-reply@yipsum.com", ipsumMap["adminEmail"], "Yipsum : Delete request", msg)
         ret.Msg = "" // don't sent back token to the client !!!
@@ -249,8 +249,8 @@ func (h *Handler)CreateIpsum(c echo.Context) error {
         } else {
             res.Msg = createRes.Msg
 
-            msg := "Hi,\r\n\r\nYour Lorem Ipsum Generator is ready : http://" + common.GetDomain() + "/" + common.GetUri(uri) + "\r\n\r\n"
-            msg += "You can start building it here : \r\n\r\nhttp://" + common.GetDomain() + "/" + common.GetUri(uri) + "/adm/" + createRes.Msg + "\r\n\r\n"
+            msg := "Hi,\r\n\r\nYour Lorem Ipsum Generator is ready : " + common.GetDomain() + "/" + common.GetUri(uri) + "\r\n\r\n"
+            msg += "You can start building it here : \r\n\r\n" + common.GetDomain() + "/" + common.GetUri(uri) + "/adm/" + createRes.Msg + "\r\n\r\n"
             msg += "Enjoy :)"
 
             common.SendMail("no-reply@yipsum.com", email, "Your Yipsum is ready !", msg)

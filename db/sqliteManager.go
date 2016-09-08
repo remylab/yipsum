@@ -189,7 +189,7 @@ func (m *SqliteManager)GetIpsumsForPage(pageNum int64, resByPage int64) ([]map[s
         t := map[string]string{
             "name": name,
             "desc": desc,
-            "url": "http://" + common.GetDomain() + "/" + uri,
+            "url": common.GetDomain() + "/" + uri,
         }
         ipsums = append(ipsums,t)
     }

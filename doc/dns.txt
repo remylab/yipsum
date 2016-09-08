@@ -1,0 +1,24 @@
+
+A
+@
+<ip>
+
+CNAME 
+www
+@
+
+TXT 
+mail._domainkey.yipsum.com 
+"v=DKIM1; k=rsa; p=..."
+
+TXT
+_dmarc.yipsum.com
+"v=DMARC1; p=none"
+
+TXT
+@
+"v=spf1 mx ip4:162.243.254.217 ~all"
+
+MX
+mail.yipsum.com
+1

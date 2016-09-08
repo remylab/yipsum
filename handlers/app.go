@@ -86,7 +86,7 @@ func (h *Handler)ResetKeyProcess(c echo.Context) error {
 
     message := ""
     if ( res.Ok ) {
-        adminURL :="http://" + common.GetDomain() + "/" + ipsum + "/adm/" + res.Msg
+        adminURL := common.GetDomain() + "/" + ipsum + "/adm/" + res.Msg
         message = "Thank you, the new admin URL is : " + adminURL
 
         h.Dbm.RemoveResetToken(ipsum)

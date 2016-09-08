@@ -1,9 +1,9 @@
 package common
 
 import (
-    "fmt"
-    //"math"
+    //"fmt"
     "io"
+    "bytes"
     "os"
     "time"
     "strings"
@@ -12,8 +12,6 @@ import (
     "math/rand"
     "text/template"
     "net/smtp"
-    "net/mail"
-    "encoding/base64"
     "log"
 
     "github.com/labstack/echo"
@@ -33,54 +31,22 @@ type (
 
 func SendMail(sender string, recipient string, subject string, msg string)  {
     // Connect to the remote SMTP server.
-    c, err := smtp.Dial( os.Getenv("yip_smtp") )
+    c, err := smtp.Dial("localhost:25")
     if err != nil {
         log.Fatal(err)
     }
-
-    // Set the sender and recipient first
-    if err := c.Mail(sender); err != nil {
-        log.Fatal(err)
-    }
-    if err := c.Rcpt(recipient); err != nil {
-        log.Fatal(err)
-    }
-
+    defer c.Close()
+    // Set the sender and recipient.
+    c.Mail(sender)
+    c.Rcpt(recipient)
     // Send the email body.
     wc, err := c.Data()
     if err != nil {
         log.Fatal(err)
     }
-
-    from := mail.Address{"sender", sender}
-    to := mail.Address{"recipient", recipient}
-
-    header := make(map[string]string)
-    header["From"] = from.String()
-    header["To"] = to.String()
-    header["Subject"] = subject
-    header["MIME-Version"] = "1.0"
-    header["Content-Type"] = "text/plain; charset=\"utf-8\""
-    header["Content-Transfer-Encoding"] = "base64"
-
-    message := ""
-    for k, v := range header {
-        message += fmt.Sprintf("%s: %s\r\n", k, v)
-    }
-    message += "\r\n" + base64.StdEncoding.EncodeToString([]byte(msg))
-
-    _, err = fmt.Fprintf(wc, message)
-    if err != nil {
-        log.Fatal(err)
-    }
-    err = wc.Close()
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    // Send the QUIT command and close the connection.
-    err = c.Quit()
-    if err != nil {
+    defer wc.Close()
+    buf := bytes.NewBufferString(msg)
+    if _, err = buf.WriteTo(wc); err != nil {
         log.Fatal(err)
     }
 }
