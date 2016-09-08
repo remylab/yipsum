@@ -129,8 +129,12 @@ func GetRootPath() string {
 func GetSessionKey() string {
     return os.Getenv("yip_session_key")
 }
-func GetRecaptchaKey() string {
-    return os.Getenv("yip_grecaptcha_key")
+
+
+func GetRecaptchaKey(s string) string {
+    if (s == "site") { return os.Getenv("yip_grecaptcha_sitekey") }
+    if (s == "secret") { return os.Getenv("yip_grecaptcha_key") }
+    return ""
 }
 
 func GetTimestamp() int64 {

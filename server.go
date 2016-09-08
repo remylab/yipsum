@@ -24,6 +24,7 @@ func main() {
     e := echo.New()
     e.Static("/static", "public/assets")
     e.Pre(middleware.RemoveTrailingSlash())
+    e.Use(middleware.Gzip())
 
     // setup templates
     e.SetRenderer(common.GetTemplate())
@@ -51,7 +52,7 @@ func main() {
 
     mCsrf := middle.CSRFWithConfig(csrfConfig)
     mAuth := middle.CheckAdminAuth(dbm, store)
-    mCaptcha := middle.ValidateRecaptcha(common.GetRecaptchaKey())
+    mCaptcha := middle.ValidateRecaptcha(common.GetRecaptchaKey("secret"))
 
     // Public Routes
     e.GET("/", h.Index)

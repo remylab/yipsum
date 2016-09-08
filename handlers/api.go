@@ -248,6 +248,12 @@ func (h *Handler)CreateIpsum(c echo.Context) error {
             }
         } else {
             res.Msg = createRes.Msg
+
+            msg := "Hi,\r\n\r\nYour Lorem Ipsum Generator is ready : http://" + common.GetDomain() + "/" + common.GetUri(uri) + "\r\n\r\n"
+            msg += "You can start building it here : \r\n\r\nhttp://" + common.GetDomain() + "/" + common.GetUri(uri) + "/adm/" + createRes.Msg + "\r\n\r\n"
+            msg += "Enjoy :)"
+
+            common.SendMail("no-reply@yipsum.com", email, "Your Yipsum is ready !", msg)
         }
     }
 

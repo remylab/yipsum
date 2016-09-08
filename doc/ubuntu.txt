@@ -1,0 +1,171 @@
+
+// root user
+adduser remy
+usermod -aG sudo remy
+sudo usermod -a -G www-data remy
+
+// basics
+
+-- nginx -- 
+sudo apt-get update
+sudo apt-get install git
+
+sudo apt-get install nginx
+sudo vi /etc/nginx/sites-enabled/default
+##  
+server_name yipsum.com ;
+...
+        location / {
+               proxy_set_header X-Real-IP $remote_addr;
+               proxy_set_header X-Forwarded-For $remote_addr;
+               proxy_set_header Host $host;
+               proxy_pass http://127.0.0.1:1424;
+        }
+##
+
+sudo service nginx restart
+
+-- gcc -- 
+sudo apt-get install gcc
+
+-- sqlite3 --
+sudo apt-get install sqlite3 libsqlite3-dev
+
+-- postfix -- 
+src : https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-postfix-as-a-send-only-smtp-server-on-ubuntu-16-04
+
+Option = Internet site
+System mail name = mail.yipsum.com
+
+sudo vi /etc/postfix/main.cf
+##
+...
+myhostname = yipsum.com
+inet_interfaces = loopback-only
+mydestination = mail.yipsum.com, localhost.localdomain, localhost, yipsum.com
+...
+##
+sudo systemctl restart postfix
+
+(( +DNS Record : TXT @ "v=spf1 mx -all"))
+
+-- dkim -- 
+src : https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy
+
+sudo apt-get dist-upgrade
+sudo apt-get install opendkim opendkim-tools
+sudo vi /etc/opendkim.conf
+## append 
+AutoRestart             Yes
+AutoRestartRate         10/1h
+UMask                   002
+Syslog                  yes
+SyslogSuccess           Yes
+LogWhy                  Yes
+
+Canonicalization        relaxed/simple
+
+ExternalIgnoreList      refile:/etc/opendkim/TrustedHosts
+InternalHosts           refile:/etc/opendkim/TrustedHosts
+KeyTable                refile:/etc/opendkim/KeyTable
+SigningTable            refile:/etc/opendkim/SigningTable
+
+Mode                    sv
+PidFile                 /var/run/opendkim/opendkim.pid
+SignatureAlgorithm      rsa-sha256
+
+UserID                  opendkim:opendkim
+
+Socket                  inet:12301@localhost
+##
+sudo vi /etc/aliases
+##
+root:          your_email_address
+##
+
+sudo vi /etc/default/opendkim
+## append
+SOCKET="inet:12301@localhost"
+##
+
+sudo vi /etc/postfix/main.cf
+## append
+milter_protocol = 2
+milter_default_action = accept
+smtpd_milters = inet:localhost:12301
+non_smtpd_milters = inet:localhost:12301
+##
+
+sudo mkdir /etc/opendkim
+sudo mkdir /etc/opendkim/keys
+
+sudo vi /etc/opendkim/TrustedHosts
+##
+127.0.0.1
+localhost
+192.168.0.1/24
+
+*.yipsum.com
+##
+
+sudo vi /etc/opendkim/KeyTable
+##
+mail._domainkey.yipsum.com yipsum.com:mail:/etc/opendkim/keys/yipsum.com/mail.private
+##
+sudo vi /etc/opendkim/SigningTable
+##
+*@yipsum.com mail._domainkey.yipsum.com
+##
+
+cd /etc/opendkim/keys
+sudo mkdir yipsum.com; cd yipsum.com
+
+sudo opendkim-genkey -s mail -d yipsum.com
+sudo chown opendkim:opendkim mail.private
+
+sudo cat mail.txt
+(+ DNS record TXT mail._domainkey.yipsum.com "v=DKIM1; k=rsa; p=(...)" )
+
+sudo service postfix restart
+sudo service opendkim restart
+
+-- golang --
+sudo apt-get update
+sudo apt-get -y upgrade
+wget https://storage.googleapis.com/golang/go1.7.linux-amd64.tar.gz
+sudo tar -xvf go1.7.linux-amd64.tar.gz
+sudo mv go /usr/local
+export GOROOT=/usr/local/go
+export PATH=$PATH:$GOROOT/bin
+sudo mkdir -p /usr/local/work/go
+sudo chown -R remy /usr/local/work
+export GOPATH=/usr/local/work/go
+
+cd /usr/local/work/go/src/github.com
+mkdir remylab
+git clone https://github.com/remylab/yipsum.git
+
+go get -u github.com/labstack/echo
+go get github.com/gorilla/sessions
+go get github.com/mattn/go-sqlite3
+go get github.com/dgrijalva/jwt-go 
+
+// web server user & group
+mkdir /var/www/yipsum
+
+sudo adduser yipsum
+sudo usermod -a -G www-data yipsum
+
+sudo chown -R yipsum:www-data /usr/local/work/go/src/github.com/remylab/yipsum
+sudo chmod -R 750 /usr/local/work/go/src/github.com/remylab/yipsum
+sudo chmod -R g+s /usr/local/work/go/src/github.com/remylab/yipsum
+
+su yipsum
+vi ~/.profile
+## edit
+export GOROOT=/usr/local/go
+export PATH=$PATH:$GOROOT/bin
+export GOPATH=/usr/local/work/go
+source ~/.profile
+
+

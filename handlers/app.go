@@ -185,6 +185,7 @@ func  (h *Handler)Admin(c echo.Context) error {
         "ipsum": ipsumMap,
         "texts":yiptexts,
         "pages": pagesModel,
+        "captchaKey": common.GetRecaptchaKey("site"),
     }
 
     return c.Render(http.StatusOK, "admin", model)
