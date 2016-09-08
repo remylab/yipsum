@@ -13,7 +13,7 @@ jQuery.each(jQuery('textarea[data-autoresize]'), function() {
 });
 
 var util = {
-    displayHelp:function(el, action = "reset", msg = ""){
+    displayHelp:function(el, action, msg){
 
         var $g = el.closest('.form-group')
         $i = $g.find('.glyphicon')
@@ -51,7 +51,7 @@ var util = {
                 attr = $e.attr('serverval')
                 if (typeof attr !== typeof undefined && attr !== false) { return; }
 
-                util.displayHelp($e);
+                util.displayHelp($e,"","");
             }
         }) 
         return isValid;
@@ -63,7 +63,7 @@ $(function() {
     var $reqFields = $('input[required]','form.validate');
 
     $reqFields.focusin(function(){
-        util.displayHelp($(this));
+        util.displayHelp($(this),"","");
     })
 
     $reqFields.focusout(function(){
@@ -116,7 +116,7 @@ var CreateIpsum = (function() {
 
         // Validate URL from DB
         $uri.focusin(function() {
-            util.displayHelp($uri,false)
+            util.displayHelp($uri,"","")
             $("#btn-yipurl").html(""); 
         });
         $uri.focusout(function() {
@@ -144,7 +144,7 @@ var CreateIpsum = (function() {
     onCheckNameResult = function(res) {
         if (res.ok) {
             uri = res.msg
-            util.displayHelp($uri,"success");
+            util.displayHelp($uri,"success","");
             $("#btn-yipurl").html("http://yipsum.com/"+uri);
         } else {
             if ( res.msg == "internal_error") {
