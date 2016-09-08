@@ -20,5 +20,5 @@ TXT
 "v=spf1 mx ip4:162.243.254.217 ~all"
 
 MX
-mail.yipsum.com
+mail.yipsum.com.
 1
