@@ -253,7 +253,7 @@ func (h *Handler)CreateIpsum(c echo.Context) error {
             msg += "You can start building it here : \r\n\r\n" + common.GetDomain() + "/" + common.GetUri(uri) + "/adm/" + createRes.Msg + "\r\n\r\n"
             msg += "Enjoy :)"
 
-            common.SendMail("no-reply@yipsum.com", email, "Your Yipsum is ready !", msg)
+            common.SendMail("no-reply@yipsum.com", email, "Your Yipsum \""+name+"\" is ready !", msg)
         }
     }
 
