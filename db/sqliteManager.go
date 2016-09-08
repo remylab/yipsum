@@ -216,7 +216,7 @@ func (m *SqliteManager)GetTotalIpsumTexts(ipsumId int64) (int,error) {
 
 func (m *SqliteManager)GetIpsumTextsForPage(ipsumId int64, pageNum int64, resByPage int64) ([]map[string]string, error) {
 
-    stmt, err := m.db.Prepare("select id, data from ipsumtext where ipsum_id = ? limit ? offset ?;")
+    stmt, err := m.db.Prepare("select id, data from ipsumtext where ipsum_id = ? order by id desc limit ? offset ?;")
     if err != nil {return nil, err}
     defer stmt.Close()
 
