@@ -1,9 +1,8 @@
 package common
 
 import (
-    //"fmt"
+    "fmt"
     "io"
-    "bytes"
     "os"
     "time"
     "strings"
@@ -31,24 +30,54 @@ type (
 
 func SendMail(sender string, recipient string, subject string, msg string)  {
     // Connect to the remote SMTP server.
-    c, err := smtp.Dial("localhost:25")
+    c, err := smtp.Dial( os.Getenv("yip_smtp") )
     if err != nil {
         log.Fatal(err)
     }
-    defer c.Close()
-    // Set the sender and recipient.
-    c.Mail(sender)
-    c.Rcpt(recipient)
+
+    // Set the sender and recipient first
+    if err := c.Mail(sender); err != nil {
+        log.Fatal(err)
+    }
+    if err := c.Rcpt(recipient); err != nil {
+        log.Fatal(err)
+    }
+
     // Send the email body.
     wc, err := c.Data()
     if err != nil {
         log.Fatal(err)
     }
-    defer wc.Close()
-    buf := bytes.NewBufferString(msg)
-    if _, err = buf.WriteTo(wc); err != nil {
+
+    headers := make(map[string]string)
+    headers["From"] = sender
+    headers["To"] = recipient
+    headers["Subject"] = subject
+    headers["MIME-Version"] = "1.0"
+    headers["Content-Type"] = "text/plain; charset=\"utf-8\""
+
+    // Setup message
+    message := ""
+    for k,v := range headers {
+        message += fmt.Sprintf("%s: %s\r\n", k, v)
+    }
+    message += "\r\n" + msg
+
+    _, err = fmt.Fprintf(wc, message)
+    if err != nil {
         log.Fatal(err)
     }
+    err = wc.Close()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Send the QUIT command and close the connection.
+    err = c.Quit()
+    if err != nil {
+        log.Fatal(err)
+    }
+
 }
 
 func GetPagesModel(baseURL string, totalPages int, nbPage int64 ) map[string]interface{} {
