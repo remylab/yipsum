@@ -170,7 +170,7 @@ func RandomString(strlen int) string {
 func GetSentences(text string) []string {
 
     ret := []string{}
-    sentenceSize := 100
+    sentenceSize := 150
 
     del := "$>$"
     text = strings.Replace(text, "...", del, -1)
