@@ -171,7 +171,10 @@ func (m *SqliteManager)GetTotalIpsums() (int,error) {
 
 func (m *SqliteManager)GetIpsumsForPage(pageNum int64, resByPage int64) ([]map[string]string, error) {
 
-    stmt, err := m.db.Prepare("select name, desc, uri from ipsums order by id desc limit ? offset ?")
+    q := "select name, desc, uri from ipsums where exists (select count(1) c from ipsumtext"
+    q += " where ipsums.id=ipsumtext.ipsum_id group by ipsumtext.ipsum_id having c > 4 ) order by id desc limit ? offset ?"
+    
+    stmt, err := m.db.Prepare(q)
     if err != nil {return nil, err}
     defer stmt.Close()
 
