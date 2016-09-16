@@ -4,6 +4,7 @@ import (
     "fmt"
     "math"
     "math/rand"
+    "time"
     "os"
     "strings"
     "strconv"
@@ -445,7 +446,12 @@ func (m *SqliteManager)GenerateIpsum(ipsumId int64) ([]string,error) {
 
         totalLength += len(data)
         sentences := common.GetSentences(data)
+        //fmt.Printf(" row data ==%v==\n",data)
         ret = append(ret, sentences...)
+
+        //for _, s := range sentences {
+        //    fmt.Printf("\n         line ==%v==\n",s)
+        //}
     }
 
     if err = rows.Err(); err != nil {
@@ -459,16 +465,26 @@ func (m *SqliteManager)GenerateIpsum(ipsumId int64) ([]string,error) {
     }
 
     d := float64(totalLength) / float64(targetLength)
-    chances := int(math.Floor(d))
-
+    chances := int(math.Floor(d) * 0.7) + 1 
     final := []string{}; finalCount := 0
-    for _, s := range ret {
-        yes := rand.Intn(chances) == 0
-        if ( yes ) {
-            finalCount += len(s)
-            final = append(final, s)
-            if ( finalCount > targetLength ) {
-                break
+
+    done := false
+    for i := 1; i <= 3; i++ {
+
+        s1 := rand.NewSource(time.Now().UnixNano())
+        r1 := rand.New(s1)
+
+        if ( done ) { break }
+        for _, s := range ret {
+            randN := r1.Intn(chances)
+            yes := randN == 0
+            if ( yes ) {
+                finalCount += len(s)
+                final = append(final, s)
+                if ( finalCount > targetLength ) {
+                    done = true
+                    break
+                }
             }
         }
     }
