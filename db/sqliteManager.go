@@ -458,14 +458,14 @@ func (m *SqliteManager)GenerateIpsum(ipsumId int64) ([]string,error) {
         return ret, err
     }
 
-    targetLength := 1200
+    targetLength := 2000
 
     if (totalLength <= targetLength) {
         return ret, nil
     }
 
     d := float64(totalLength) / float64(targetLength)
-    chances := int(math.Floor(d) * 0.7) + 1 
+    chances := int(math.Floor(d)) + 1 
     final := []string{}; finalCount := 0
 
     done := false
