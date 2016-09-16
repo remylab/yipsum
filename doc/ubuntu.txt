@@ -175,3 +175,14 @@ cp setup_dev_en.sh work/prod_env.sh
 source work/prod_env.sh
 
 sqlite3 work/yipsum.db < conf/evol/createdb.sql
+
+-- crontab --
+su yipsum
+crontab -e
+##
+SHELL=/bin/bash
+HOME=/home/yipsum
+*/2 * * * *  bash /usr/local/work/go/src/github.com/remylab/yipsum/keepalive.sh
+##
+
+

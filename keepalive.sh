@@ -1,5 +1,7 @@
 #!/bin/bash 
 
+cd /usr/local/work/go/src/github.com/remylab/yipsum
+
 yid=$(cat work/yipid)
 d=$(date)
 
